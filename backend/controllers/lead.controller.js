@@ -209,7 +209,7 @@ const getTodaysFollowUps = (req, res) => {
      WHERE f.next_followup = CURDATE()`,
     (err, results) => {
       if (err) return res.status(500).json({ error: "DB error" });
-      res.json(results);
+      res.json({ todayFollowUps: results });
     }
   );
 };
@@ -222,7 +222,7 @@ const getPendingFollowUps = (req, res) => {
      WHERE f.next_followup < CURDATE()`,
     (err, results) => {
       if (err) return res.status(500).json({ error: "DB error" });
-      res.json(results);
+      res.json({ pendingFollowUps: results });
     }
   );
 };
@@ -269,29 +269,29 @@ const exportLeadsToExcel = (req, res) => {
 };
 
 
-// GET LEAD TIMELINE
-// backend/controllers/lead.controller.js
+/* =========================
+   LEAD TIMELINE
+========================= */
+const getLeadTimeline = (req, res) => {
+  const { leadId } = req.params;
 
-const db = require("../config/db"); // adjust if your DB import differs
+  db.query(
+    `SELECT type, description, time
+     FROM lead_timeline
+     WHERE lead_id = ?
+     ORDER BY time DESC`,
+    [leadId],
+    (err, results) => {
+      if (err) {
+        console.error("Timeline error:", err);
+        return res.status(500).json({ message: "Failed to fetch timeline" });
+      }
 
-exports.getLeadTimeline = async (req, res) => {
-  try {
-    const { leadId } = req.params;
-
-    const [rows] = await db.query(
-      `SELECT type, description, time 
-       FROM lead_timeline 
-       WHERE lead_id = ? 
-       ORDER BY time DESC`,
-      [leadId]
-    );
-
-    res.json({ timeline: rows });
-  } catch (error) {
-    console.error("Timeline error:", error);
-    res.status(500).json({ message: "Failed to fetch timeline" });
-  }
+      res.json({ timeline: results });
+    }
+  );
 };
+
 
 
 /* =========================
@@ -307,5 +307,6 @@ module.exports = {
   getTodaysFollowUps,
   getPendingFollowUps,
   importLeadsFromExcel,
-  exportLeadsToExcel
+  exportLeadsToExcel,
+  getLeadTimeline
 };

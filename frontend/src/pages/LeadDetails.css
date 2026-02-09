@@ -46,6 +46,17 @@
   color: #111827;
 }
 
+.lead-description {
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.6;
+}
+
 /* ================= TIMELINE ================= */
 
 .timeline {

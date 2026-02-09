@@ -51,6 +51,11 @@ return (
     <div className="lead-info"><b>Status:</b> {lead.status}</div>
     <div className="lead-info"><b>Source:</b> {lead.source}</div>
     <div className="lead-info"><b>Assigned To:</b> {lead.assigned_to || "-"}</div>
+      <p><b>Description:</b></p>
+<div className="lead-description">
+  {lead.description ? lead.description : "No description added."}
+</div>
+
   </div>
 </div>
 

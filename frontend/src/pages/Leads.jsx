@@ -9,8 +9,7 @@ export default function Leads() {
   useEffect(() => {
     fetchLeads()
       .then((res) => {
-        console.log("API response:", res.data);   // 🔴 IMPORTANT
-        setLeads(res.data.leads);                // MUST be .leads
+        setLeads(res.data.leads);
         setLoading(false);
       })
       .catch((err) => {
