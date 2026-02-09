@@ -1,0 +1,114 @@
+.add-lead-page {
+  padding: 24px;
+}
+
+.add-lead-page h2 {
+  margin-bottom: 20px;
+}
+
+/* GRID LAYOUT */
+.add-lead-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+/* CARD */
+.card {
+  background: #ffffff;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* INPUTS */
+.card input,
+.card select,
+.card textarea {
+  width: 100%;
+  padding: 11px 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+/* CHECKBOX */
+.checkbox {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+/* RIGHT PANEL */
+.assignment-card {
+  position: sticky;
+  top: 20px;
+}
+
+/* RADIO */
+.radio-group p {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.radio-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+/* BUTTON */
+.primary-btn {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #1e40af;
+}
+
+/* ANIMATION */
+.animate {
+  animation: fadeUp 0.5s ease;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reminder-row {
+  display: flex;
+  gap: 12px;
+}
+
+.reminder-row input {
+  flex: 1;
+}
+
+.reminder-row select {
+  flex: 1;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .add-lead-grid {
+    grid-template-columns: 1fr;
+  }
+}
