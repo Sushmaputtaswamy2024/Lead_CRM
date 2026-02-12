@@ -1,43 +1,38 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api";
+const BASE_URL = "http://13.233.XXX.XXX:5000/api";
 
 /* =======================
    LEADS
 ======================= */
 
-export const fetchLeads = () =>
-  axios.get(`${API}/leads`);
+export const fetchLeads = () => axios.get(`${BASE_URL}/leads`);
 
-export const fetchLeadById = (id) =>
-  axios.get(`${API}/leads/${id}`);
+export const fetchLeadById = (id) => axios.get(`${BASE_URL}/leads/${id}`);
 
-export const addLead = (data) =>
-  axios.post(`${API}/leads`, data);
+export const addLead = (data) => axios.post(`${BASE_URL}/leads`, data);
 
-export const updateLead = (id, data) =>
-  axios.put(`${API}/leads/${id}`, data);
+export const updateLead = (id, data) => axios.put(`${BASE_URL}/leads/${id}`, data);
 
 /* =======================
    FOLLOW UPS (GLOBAL)
 ======================= */
 
-export const fetchTodayFollowUps = () =>
-  axios.get(`${API}/leads/reports/today-followups`);
+export const fetchTodayFollowUps = () => axios.get(`${BASE_URL}/followups/today`);
 
 export const fetchPendingFollowUps = () =>
-  axios.get(`${API}/leads/reports/pending-followups`);
+  axios.get(`${BASE_URL}/followups/pending`);
 
 /* =======================
    FOLLOW UPS (BY LEAD)
 ======================= */
 
 export const fetchFollowUpsByLead = (leadId) =>
-  axios.get(`${API}/leads/${leadId}/followups`);
+  axios.get(`${BASE_URL}/leads/${leadId}/followups`);
 
 /* =======================
    TIMELINE
 ======================= */
 
 export const fetchLeadTimeline = (leadId) =>
-  axios.get(`${API}/leads/${leadId}/timeline`);
+  axios.get(`${BASE_URL}/leads/${leadId}/timeline`);

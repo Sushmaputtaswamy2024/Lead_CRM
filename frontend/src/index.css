@@ -22,10 +22,11 @@
 
 .app-content {
   flex: 1;
-  padding: 24px 32px;
+  padding: 32px;
   background: #f5f7fb;
   overflow-x: hidden;
 }
+
 
 
 a {
@@ -37,13 +38,18 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+html, body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
+  width: 100%;
+  height: 100%;
 }
+
+body {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  background: #f5f7fb;
+}
+
 
 h1 {
   font-size: 3.2em;
@@ -68,6 +74,22 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+
+
+.side-link {
+  display: block;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  color: #111827;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.side-link:hover {
+  background: #f3f4f6;
+}
+
 
 @media (prefers-color-scheme: light) {
   :root {

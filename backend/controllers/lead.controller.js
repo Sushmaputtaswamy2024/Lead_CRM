@@ -235,26 +235,79 @@ const importLeadsFromExcel = (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet);
 
+  const sql = `
+    INSERT INTO leads (
+      name,
+      phone,
+      whatsapp,
+      email,
+      city,
+      source,
+      status,
+      call_status,
+      building_type,
+      floors,
+      measurement,
+      sqft,
+      budget,
+      assigned_to,
+      quotation_sent,
+      project_start,
+      snooze_until,
+      description
+    )
+    VALUES ?
+    ON DUPLICATE KEY UPDATE
+      name = VALUES(name),
+      email = VALUES(email),
+      city = VALUES(city),
+      status = VALUES(status),
+      source = VALUES(source),
+      budget = VALUES(budget),
+      assigned_to = VALUES(assigned_to)
+  `;
+
   const values = rows.map(r => [
     r.name,
     r.phone,
+    r.whatsapp || r.phone,
     r.email || null,
+    r.city || null,
     r.source || "Excel",
-    r.status || "New"
+    r.status || "New",
+    r.call_status || null,
+    r.building_type || null,
+    r.floors || null,
+    r.measurement || null,
+    r.sqft || null,
+    r.budget || null,
+    r.assigned_to || null,
+    r.quotation_sent || null,
+    r.project_start || null,
+    r.snooze_until || null,
+    r.description || null
   ]);
 
-  db.query(
-    "INSERT INTO leads (name, phone, email, source, status) VALUES ?",
-    [values],
-    (err, result) => {
-      if (err) return res.status(500).json({ error: "Import failed" });
-      res.json({ inserted: result.affectedRows });
+  db.query(sql, [values], (err, result) => {
+    if (err) {
+      console.error("Import failed:", err);
+      return res.status(500).json({ error: "Import failed" });
     }
-  );
+
+    res.json({ success: true, affectedRows: result.affectedRows });
+  });
 };
 
+
 const exportLeadsToExcel = (req, res) => {
-  db.query("SELECT * FROM leads", (err, results) => {
+  const { status, assigned_to } = req.query;
+
+  let sql = "SELECT * FROM leads WHERE 1=1";
+
+  if (status) sql += ` AND status='${status}'`;
+  if (assigned_to) sql += ` AND assigned_to='${assigned_to}'`;
+
+  db.query(sql, (err, results) => {
     if (err) return res.status(500).json({ error: "DB error" });
 
     const ws = XLSX.utils.json_to_sheet(results);
@@ -267,6 +320,7 @@ const exportLeadsToExcel = (req, res) => {
     res.download(filePath);
   });
 };
+
 
 
 /* =========================
@@ -292,7 +346,90 @@ const getLeadTimeline = (req, res) => {
   );
 };
 
+const logLeadActivity = (db, {
+  leadId,
+  user,
+  action,
+  startTime,
+  endTime
+}) => {
+  const duration =
+    startTime && endTime
+      ? Math.floor((endTime - startTime) / 60000)
+      : null;
 
+  db.query(
+    `INSERT INTO lead_activity_log
+     (lead_id, user_email, user_role, action, start_time, end_time, duration_minutes)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [
+      leadId,
+      user.email,
+      user.role,
+      action,
+      startTime,
+      endTime,
+      duration
+    ]
+  );
+};
+
+const getDashboardSummary = (req, res) => {
+  const summary = {};
+
+  // Total leads
+  db.query("SELECT COUNT(*) AS total FROM leads", (err, totalResult) => {
+    if (err) return res.status(500).json({ error: "DB error" });
+    summary.totalLeads = totalResult[0].total;
+
+    // Today leads
+    db.query(
+      "SELECT COUNT(*) AS today FROM leads WHERE DATE(created_at) = CURDATE()",
+      (err, todayResult) => {
+        if (err) return res.status(500).json({ error: "DB error" });
+        summary.todayLeads = todayResult[0].today;
+
+        // Interested
+        db.query(
+          "SELECT COUNT(*) AS interested FROM leads WHERE LOWER(status) = 'interested'",
+          (err, interestedResult) => {
+            if (err) return res.status(500).json({ error: "DB error" });
+            summary.interested = interestedResult[0].interested;
+
+            // Converted
+            db.query(
+              "SELECT COUNT(*) AS converted FROM leads WHERE LOWER(status) = 'converted'",
+              (err, convertedResult) => {
+                if (err) return res.status(500).json({ error: "DB error" });
+                summary.converted = convertedResult[0].converted;
+
+                // Today Followups
+                db.query(
+                  "SELECT COUNT(*) AS todayFollowUps FROM followups WHERE DATE(next_followup) = CURDATE()",
+                  (err, todayFU) => {
+                    if (err) return res.status(500).json({ error: "DB error" });
+                    summary.todayFollowUps = todayFU[0].todayFollowUps;
+
+                    // Pending Followups
+                    db.query(
+                      "SELECT COUNT(*) AS pendingFollowUps FROM followups WHERE DATE(next_followup) < CURDATE()",
+                      (err, pendingFU) => {
+                        if (err) return res.status(500).json({ error: "DB error" });
+                        summary.pendingFollowUps = pendingFU[0].pendingFollowUps;
+
+                        res.json(summary);
+                      }
+                    );
+                  }
+                );
+              }
+            );
+          }
+        );
+      }
+    );
+  });
+};
 
 /* =========================
    EXPORTS
@@ -308,5 +445,7 @@ module.exports = {
   getPendingFollowUps,
   importLeadsFromExcel,
   exportLeadsToExcel,
-  getLeadTimeline
+  getLeadTimeline,
+  logLeadActivity,
+  getDashboardSummary
 };

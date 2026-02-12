@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../config/upload");
 
 const {
   createLead,
@@ -12,36 +13,35 @@ const {
   getPendingFollowUps,
   importLeadsFromExcel,
   exportLeadsToExcel,
-  getLeadTimeline
+  getDashboardSummary
 } = require("../controllers/lead.controller");
 
-// =======================
-// LEADS CRUD
-// =======================
+// =========================
+// DASHBOARD SUMMARY
+router.get("/dashboard-summary", getDashboardSummary);
+
+// =========================
+// FOLLOWUP SUMMARY
+router.get("/followups/today", getTodaysFollowUps);
+router.get("/followups/pending", getPendingFollowUps);
+
+// =========================
+// EXCEL
+router.post("/import", upload.single("file"), importLeadsFromExcel);
+router.get("/export", exportLeadsToExcel);
+
+// =========================
+// LEADS
 router.post("/", createLead);
 router.get("/", getAllLeads);
-router.get("/:id", getLeadById);
-router.put("/:id", updateLead);
 
-// =======================
-// FOLLOW UPS
-// =======================
-router.post("/:leadId/followup", addFollowUp);
+// FOLLOWUPS
+router.post("/:leadId/followups", addFollowUp);
 router.get("/:leadId/followups", getFollowUps);
 
-// =======================
-// REPORTS
-// =======================
-router.get("/reports/today-followups", getTodaysFollowUps);
-router.get("/reports/pending-followups", getPendingFollowUps);
-
-// =======================
-// EXCEL IMPORT / EXPORT
-// =======================
-router.post("/import", importLeadsFromExcel);
-router.get("/export", exportLeadsToExcel);
-router.get("/:leadId/timeline", getLeadTimeline);
-
-  
+// =========================
+// DYNAMIC ROUTES LAST
+router.get("/:id", getLeadById);
+router.put("/:id", updateLead);
 
 module.exports = router;

@@ -1,91 +1,116 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import FollowUps from "./FollowUps"; 
-import { fetchLeadTimeline } from "../api/leads";
-import "./LeadDetails.css"; // Import CSS for styling
+import { useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+
+import "./LeadDetails.css";
+
 export default function LeadDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [lead, setLead] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [timeline, setTimeline] = useState([]);
+  const [followUps, setFollowUps] = useState([]);
+  // const [sessionId, setSessionId] = useState(null);
+  // const [setSessionId] = useState(null);
 
 
   useEffect(() => {
-    fetchLeadTimeline(id)
-  .then(res => setTimeline(res.data.timeline || []))
-  .catch(console.error);
+  let activeSessionId = null;
 
-    axios
-      .get(`http://localhost:5000/api/leads/${id}`)
-      .then((res) => {
-        console.log("Lead details response:", res.data); // 🔴 debug
-        setLead(res.data.lead); // ✅ IMPORTANT
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error loading lead", err);
-        setLoading(false);
-      });
-  }, [id]);
+  const fetchDataAndStartSession = async () => {
+    try {
+      const leadRes = await axios.get(
+        `http://13.233.XXX.XXX:5000/api/leads/${id}`
+      );
+      setLead(leadRes.data.lead);
 
-  if (loading) return <p>Loading lead...</p>;
-  if (!lead) return <p>Lead not found.</p>;
+      const followRes = await axios.get(
+        `http://13.233.XXX.XXX:5000/api/leads/${id}/followups`
+      );
+      setFollowUps(followRes.data.followUps || []);
 
-return (
-  <div className="lead-details-page">
-    <button className="lead-back-btn" onClick={() => navigate("/leads")}>
-  ⬅ Back
-</button>
+      if (user?.email) {
+        const sessionRes = await axios.post(
+          "http://13.233.XXX.XXX:5000/api/reports/start-session",
+          {
+            lead_id: id,
+            user_email: user.email,
+            user_role: user.role
+          }
+        );
 
+        activeSessionId = sessionRes.data.sessionId;
+      }
+    } catch (err) {
+      console.error("Lead details error:", err);
+    }
+  };
 
-    <div className="lead-info-card">
-  <h2>Lead Details</h2>
+  fetchDataAndStartSession();
 
-  <div className="lead-info-grid">
-    <div className="lead-info"><b>Name:</b> {lead.name}</div>
-    <div className="lead-info"><b>Phone:</b> {lead.phone}</div>
-    <div className="lead-info"><b>Email:</b> {lead.email || "-"}</div>
-    <div className="lead-info"><b>Status:</b> {lead.status}</div>
-    <div className="lead-info"><b>Source:</b> {lead.source}</div>
-    <div className="lead-info"><b>Assigned To:</b> {lead.assigned_to || "-"}</div>
-      <p><b>Description:</b></p>
-<div className="lead-description">
-  {lead.description ? lead.description : "No description added."}
-</div>
-
-  </div>
-</div>
+  return () => {
+    if (activeSessionId) {
+      axios.post(
+        "http://13.233.XXX.XXX:5000/api/reports/end-session",
+        { session_id: activeSessionId }
+      );
+    }
+  };
+}, [id, user?.email]);
 
 
-    <div className="timeline-section">
-      <h3>Activity Timeline</h3>
+  if (!lead) return <p>Loading...</p>;
 
-      {timeline.length === 0 ? (
-        <p className="empty">No activity yet.</p>
-      ) : (
-        <div className="timeline">
-          {timeline.map((item, i) => (
-            <div key={i} className="timeline-item">
-              <span className={`dot ${item.type}`} />
-              <div>
-                <p className="time">
-                  {new Date(item.time).toLocaleString()}
-                </p>
-                <p>{item.description}</p>
-              </div>
-            </div>
-          ))}
+  const todayDate = new Date().toISOString().slice(0, 10);
+
+  const todayCount = followUps.filter(
+    f =>
+      f.next_followup &&
+      f.next_followup.slice(0, 10) === todayDate
+  ).length;
+
+  const pendingCount = followUps.filter(
+    f =>
+      f.next_followup &&
+      f.next_followup.slice(0, 10) < todayDate
+  ).length;
+
+  const totalCount = followUps.length;
+
+  return (
+    <div className="lead-details-page">
+      <h2>Lead Details</h2>
+
+      <div className="lead-info">
+        <p><b>Name:</b> {lead.name}</p>
+        <p><b>Phone:</b> {lead.phone}</p>
+        <p><b>Email:</b> {lead.email}</p>
+        <p><b>Status:</b> {lead.status}</p>
+      </div>
+
+      <h3>Follow Ups</h3>
+
+      <div className="followup-summary">
+        <div className="summary-card today">
+          <p>Today</p>
+          <h1>{todayCount}</h1>
         </div>
+
+        <div className="summary-card pending">
+          <p>Pending</p>
+          <h1>{pendingCount}</h1>
+        </div>
+
+        <div className="summary-card total">
+          <p>Total</p>
+          <h1>{totalCount}</h1>
+        </div>
+      </div>
+
+      {totalCount === 0 && (
+        <p className="empty">No follow-ups for this lead.</p>
       )}
     </div>
-
-    <div className="followups-wrapper">
-      <FollowUps leadId={lead.id} />
-    </div>
-  </div>
-);
-
+  );
 }

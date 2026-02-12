@@ -1,50 +1,45 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import logo from "../assets/logo.png.jpeg";
+import "./Sidebar.css";
 
-export default function Sidebar() {
+export default function Sidebar({ open, setOpen }) {
+  const { user, logout } = useAuth();
+
   return (
-    <div
-      style={{
-        width: "200px",
-        background: "#1f2937",
-        color: "#fff",
-        height: "100vh",
-        padding: "20px"
-      }}
-    >
-      <h2 style={{ marginBottom: "30px" }}>Lead System</h2>
+    <>
+      {/* MOBILE HEADER */}
+      <div className="mobile-header">
+        <button className="hamburger" onClick={() => setOpen(true)}>
+          ☰
+        </button>
+        <h3>Lead System</h3>
+      </div>
 
-      <ul style={{ listStyle: "none", padding: 0, lineHeight: "2.2" }}>
-        <li>
-          <Link to="/" style={{ color: "#fff", textDecoration: "none" }}>
-            Dashboard
-          </Link>
-        </li>
+      {/* OVERLAY */}
+      {open && <div className="overlay" onClick={() => setOpen(false)} />}
 
-        <li>
-          <Link to="/leads" style={{ color: "#fff", textDecoration: "none" }}>
-            Leads
-          </Link>
-        </li>
+      <aside className={`sidebar ${open ? "open" : ""}`}>
+        <div className="logo-section">
+          <img src={logo} alt="Company Logo" />
+          <h2>Lead System</h2>
+        </div>
 
-        <li>
-          <Link to="/add-lead" style={{ color: "#fff", textDecoration: "none" }}>
-            Add Lead
-          </Link>
-        </li>
+        <ul className="menu">
+          <li><Link onClick={() => setOpen(false)} to="/">Dashboard</Link></li>
+          <li><Link onClick={() => setOpen(false)} to="/leads">Leads</Link></li>
+          <li><Link onClick={() => setOpen(false)} to="/add-lead">Add Lead</Link></li>
+          <li><Link onClick={() => setOpen(false)} to="/follow-ups">Follow Ups</Link></li>
 
-        <li>
-          <Link to="/follow-ups" style={{ color: "#fff", textDecoration: "none" }}>
-            Follow Ups
-          </Link>
-        </li>
+          {user?.role === "admin" && (
+            <li><Link onClick={() => setOpen(false)} to="/reports">Reports</Link></li>
+          )}
+        </ul>
 
-        <li>
-          <Link to="/reports" style={{ color: "#fff", textDecoration: "none" }}>
-            Reports
-          </Link>
-        </li>
-      </ul>
-    </div>
-    
+        <button className="logout-btn" onClick={logout}>
+          Logout
+        </button>
+      </aside>
+    </>
   );
 }

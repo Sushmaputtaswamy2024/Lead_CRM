@@ -1,0 +1,27 @@
+.leads-page {
+  padding: 20px;
+}
+
+/* TABLE WRAPPER FOR RESPONSIVENESS */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Improve table look */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px; /* Important for horizontal scroll */
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .leads-page {
+    padding: 12px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+}

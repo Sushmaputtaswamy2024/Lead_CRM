@@ -16,7 +16,7 @@ export default function EditLead() {
   // Load lead by ID
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/leads/${id}`)
+      .get(`http://13.233.XXX.XXX:5000/api/leads/${id}`)
       .then((res) => setForm(res.data))
       .catch((err) => console.error(err));
   }, [id]);
@@ -28,7 +28,7 @@ export default function EditLead() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/leads/${id}`, form);
+      await axios.put(`http://13.233.XXX.XXX:5000/api/leads/${id}`, form);
       alert("Lead updated successfully");
       navigate("/leads");
     } catch (err) {

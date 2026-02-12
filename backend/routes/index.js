@@ -1,15 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-// const leadRoutes = require("./lead.routes");
+const leadRoutes = require("./lead.routes");
+const reportRoutes = require("./report.routes");
 
-// all APIs start with /api
-router.use("/api/leads", require("./lead.routes"));
-router.use("/meta", require("./meta.routes"));
-
-// test route
-router.get("/", (req, res) => {
-  res.send("API routes working");
-});
+router.use("/leads", leadRoutes);
+router.use("/reports", reportRoutes);
 
 module.exports = router;
