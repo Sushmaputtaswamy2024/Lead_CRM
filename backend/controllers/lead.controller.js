@@ -111,8 +111,12 @@ const getAllLeads = (req, res) => {
 
   // BDA1 or BDA2
   if (role === "bda1" || role === "bda2") {
-    sql += ` AND assigned_to = '${email}' AND status != 'JUNK_REQUESTED'`;
-  }
+  sql += ` 
+    AND (assigned_to = '${email}' OR assigned_to IS NULL)
+    AND status != 'JUNK_REQUESTED'
+  `;
+}
+
 
   // Admin sees everything except permanently deleted
   if (role === "admin") {

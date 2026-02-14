@@ -44,10 +44,15 @@ a:hover {
 }
 
 html, body {
-  margin: 0;
-  padding: 0;
+  height: 100%;
   overflow-x: hidden;
 }
+
+#root {
+  height: 100%;
+  overflow-x: hidden;
+}
+
 
 
 body {

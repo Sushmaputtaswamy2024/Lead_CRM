@@ -22,19 +22,25 @@ export default function Leads() {
 
   // ================= LOAD LEADS =================
   const loadLeads = async () => {
-    if (!user) return;
+  if (!user) return;
 
-    try {
-      const res = await fetchLeads(user, showJunk);
-      const data = res.data.leads || [];
-      setLeads(data);
-      setFilteredLeads(data);
-    } catch (err) {
-      console.error("Fetch leads error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const res = await fetchLeads(user, showJunk);
+    const data = res.data.leads || [];
+
+    setLeads(data);
+    setFilteredLeads(data);
+
+    // 👇 ADD THIS LINE HERE
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+  } catch (err) {
+    console.error("Fetch leads error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     loadLeads();
@@ -55,9 +61,7 @@ export default function Leads() {
       const todayDate = new Date().toISOString().slice(0, 10);
 
       const todayLeads = leads.filter(
-        (lead) =>
-          lead.created_at &&
-          lead.created_at.slice(0, 10) === todayDate
+        (lead) => lead.created_at && lead.created_at.slice(0, 10) === todayDate,
       );
 
       setFilteredLeads(todayLeads);
@@ -73,7 +77,7 @@ export default function Leads() {
         (lead) =>
           lead.name?.toLowerCase().includes(search.toLowerCase()) ||
           lead.phone?.includes(search) ||
-          lead.email?.toLowerCase().includes(search.toLowerCase())
+          lead.email?.toLowerCase().includes(search.toLowerCase()),
       );
     }
 
@@ -85,7 +89,7 @@ export default function Leads() {
       data = data.filter(
         (lead) =>
           lead.source &&
-          lead.source.toLowerCase() === sourceFilter.toLowerCase()
+          lead.source.toLowerCase() === sourceFilter.toLowerCase(),
       );
     }
 
@@ -113,24 +117,6 @@ export default function Leads() {
     <div className="leads-page">
       <div className="leads-header">
         <h2 className="page-title">Leads</h2>
-
-        {/* ADMIN JUNK TOGGLE */}
-        {user?.role === "admin" && (
-          <button
-            onClick={() => setShowJunk(!showJunk)}
-            style={{
-              background: showJunk ? "#ef4444" : "#6b7280",
-              color: "white",
-              padding: "8px 14px",
-              borderRadius: "8px",
-              border: "none",
-              marginBottom: "12px",
-              cursor: "pointer"
-            }}
-          >
-            {showJunk ? "View Active Leads" : "View Junk Requests"}
-          </button>
-        )}
 
         <div className="filter-bar">
           <input
@@ -169,9 +155,20 @@ export default function Leads() {
             <option value="oldest">Oldest First</option>
           </select>
 
-          <button className="reset-btn" onClick={resetFilters}>
-            Reset
-          </button>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button className="reset-btn" onClick={resetFilters}>
+              Reset
+            </button>
+
+            {user?.role === "admin" && (
+              <button
+                className="junk-btn"
+                onClick={() => setShowJunk(!showJunk)}
+              >
+                {showJunk ? "Active Leads" : "Junk Leads"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

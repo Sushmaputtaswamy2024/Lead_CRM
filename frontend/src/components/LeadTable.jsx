@@ -13,16 +13,15 @@ export default function LeadTable({ leads }) {
 
   const handleReassign = async (leadId) => {
     const newAssignee = prompt(
-      "Enter email to reassign (vindiainfrasec@bda1 or vindiainfrasec@bda2):"
+      "Enter email to reassign (vindiainfrasec@bda1 or vindiainfrasec@bda2):",
     );
 
     if (!newAssignee) return;
 
     try {
-      await axios.put(
-        `http://localhost:5000/api/leads/${leadId}/reassign`,
-        { assigned_to: newAssignee }
-      );
+      await axios.put(`http://localhost:5000/api/leads/${leadId}/reassign`, {
+        assigned_to: newAssignee,
+      });
 
       alert("Lead reassigned successfully ✅");
       window.location.reload();
@@ -34,14 +33,14 @@ export default function LeadTable({ leads }) {
 
   const handlePermanentDelete = async (leadId) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to permanently delete this lead?"
+      "Are you sure you want to permanently delete this lead?",
     );
 
     if (!confirmDelete) return;
 
     try {
       await axios.put(
-        `http://localhost:5000/api/leads/${leadId}/permanent-delete`
+        `http://localhost:5000/api/leads/${leadId}/permanent-delete`,
       );
 
       alert("Lead permanently deleted 🗑");
@@ -74,6 +73,36 @@ export default function LeadTable({ leads }) {
                 onClick={() => navigate(`/leads/${lead.id}`)}
               >
                 {lead.name}
+
+                {user?.role !== "admin" && lead.assigned_to === user.email && (
+                  <span
+                    style={{
+                      marginLeft: "8px",
+                      padding: "2px 6px",
+                      fontSize: "11px",
+                      background: "#22c55e",
+                      color: "white",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    Assigned to You
+                  </span>
+                )}
+
+                {user?.role !== "admin" && !lead.assigned_to && (
+                  <span
+                    style={{
+                      marginLeft: "8px",
+                      padding: "2px 6px",
+                      fontSize: "11px",
+                      background: "#f59e0b",
+                      color: "white",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    Unassigned
+                  </span>
+                )}
               </td>
 
               <td>{lead.phone}</td>
@@ -90,9 +119,7 @@ export default function LeadTable({ leads }) {
 
               <td>
                 <span
-                  className={`source-badge ${
-                    lead.source?.toLowerCase() || ""
-                  }`}
+                  className={`source-badge ${lead.source?.toLowerCase() || ""}`}
                 >
                   {lead.source}
                 </span>
@@ -125,7 +152,7 @@ export default function LeadTable({ leads }) {
                             padding: "6px 12px",
                             borderRadius: "6px",
                             border: "none",
-                            cursor: "pointer"
+                            cursor: "pointer",
                           }}
                           onClick={() => handleReassign(lead.id)}
                         >
@@ -139,11 +166,9 @@ export default function LeadTable({ leads }) {
                             padding: "6px 12px",
                             borderRadius: "6px",
                             border: "none",
-                            cursor: "pointer"
+                            cursor: "pointer",
                           }}
-                          onClick={() =>
-                            handlePermanentDelete(lead.id)
-                          }
+                          onClick={() => handlePermanentDelete(lead.id)}
                         >
                           Delete
                         </button>

@@ -2,7 +2,9 @@
   padding: 24px;
   width: 100%;
   box-sizing: border-box;
+  overflow-x: auto;
 }
+
 
 .leads-header {
   display: flex;
@@ -120,6 +122,20 @@ tbody tr:hover {
 
 .reset-btn:hover {
   background: #dc2626;
+}
+
+.junk-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #6b7280;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.junk-btn:hover {
+  background: #374151;
 }
 
 

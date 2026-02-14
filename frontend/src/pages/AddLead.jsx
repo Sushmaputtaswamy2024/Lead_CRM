@@ -194,9 +194,8 @@ export default function AddLead() {
 
           <select name="assigned_to" onChange={handleChange}>
             <option value="">Assign To</option>
-            <option>Manager</option>
-            <option>BDA</option>
-            <option>Assistant BDA</option>
+            <option value="vindiainfrasec@bda1">BDA 1</option>
+            <option value="vindiainfrasec@bda2">BDA 2</option>
           </select>
 
           <div className="radio-group">
