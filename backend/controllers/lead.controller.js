@@ -415,14 +415,13 @@ const getLeadTimeline = (req, res) => {
 
 const logLeadActivity = (db, { leadId, user, action, startTime, endTime }) => {
   const duration =
-    startTime && endTime ? Math.floor((endTime - startTime) / 60000) : null;
+  startTime && endTime
+    ? Math.floor(
+        (new Date(endTime).getTime() -
+         new Date(startTime).getTime()) / 60000
+      )
+    : null;
 
-  db.query(
-    `INSERT INTO lead_activity_log
-     (lead_id, user_email, user_role, action, start_time, end_time, duration_minutes)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [leadId, user.email, user.role, action, startTime, endTime, duration],
-  );
 };
 
 const getDashboardSummary = (req, res) => {

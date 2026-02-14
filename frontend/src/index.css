@@ -14,11 +14,21 @@
 }
 
 
+/* FULL APP LAYOUT */
 .app-layout {
   display: flex;
-  min-height: 100vh;
-  width: 100%;
+  height: 100vh;          /* fixed height */
+  overflow: hidden;       /* prevent outer scroll */
 }
+
+/* MAIN CONTENT */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;       /* ONLY vertical scroll lives here */
+  overflow-x: hidden;
+}
+
 
 .app-content {
   flex: 1;
@@ -58,7 +68,8 @@ html, body {
 body {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   background: #f5f7fb;
-   overflow-y: scroll;
+  margin: 0;
+  overflow: hidden;   /* remove global scroll */
 }
 
 

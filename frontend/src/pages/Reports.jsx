@@ -41,15 +41,7 @@ export default function Reports() {
 
   const totalLeads = timePerLead.length;
 
-  const avgMinutes =
-    totalLeads === 0
-      ? 0
-      : Math.round(
-          timePerLead.reduce(
-            (sum, l) => sum + Number(l.total_minutes || 0),
-            0
-          ) / totalLeads
-        );
+  
 
   const longPending = timePerLead.filter(
     l => Number(l.total_minutes) > 60 * 24 * 3
@@ -126,10 +118,7 @@ const downloadReports = () => {
           <h1>{totalLeads}</h1>
         </div>
 
-        <div className="report-card green">
-          <p>Avg Handling Time</p>
-          <h1>{avgMinutes} min</h1>
-        </div>
+        
 
         <div className="report-card red">
           <p>High Risk Leads</p>
