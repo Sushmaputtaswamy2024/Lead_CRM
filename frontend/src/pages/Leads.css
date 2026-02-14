@@ -1,19 +1,127 @@
 .leads-page {
-  padding: 20px;
+  padding: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* TABLE WRAPPER FOR RESPONSIVENESS */
+.leads-header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
 }
 
-/* Improve table look */
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px; /* Important for horizontal scroll */
+  min-width: 800px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
+
+thead {
+  background: #f3f4f6;
+}
+
+th,
+td {
+  padding: 14px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+  font-weight: 600;
+  color: #374151;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* ACTION BUTTONS */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.view-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.edit-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.view-btn:hover {
+  background: #1e40af;
+}
+
+.edit-btn:hover {
+  background: #15803d;
+}
+
+.loading {
+  padding: 20px;
+  font-size: 14px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-bar input,
+.filter-bar select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.filter-bar input:focus,
+.filter-bar select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+
+.reset-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.reset-btn:hover {
+  background: #dc2626;
+}
+
 
 /* Mobile adjustments */
 @media (max-width: 768px) {

@@ -1,14 +1,18 @@
-.layout {
+/* FULL APP LAYOUT */
+.app-layout {
   display: flex;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 /* MAIN CONTENT */
 .main-content {
   flex: 1;
-  padding: 20px;
-  transition: margin-left 0.3s ease;
+  padding: 24px;
+  overflow-y: auto;
+  height: 100vh;
 }
+
 
 /* MOBILE HEADER FIX */
 .mobile-header {

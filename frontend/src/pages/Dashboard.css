@@ -1,13 +1,26 @@
-.dashboard-page {
-  padding: 0;
-  width: 100%;
-  /* margin: 0 auto; */
-  /* animation: fadeIn 0.4s ease; */
+* {
+  box-sizing: border-box;
 }
+
+/* ================= PAGE ================= */
+
+.dashboard-page {
+  padding: 24px;
+  width: 100%;
+}
+
 .dashboard-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px 0;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
 }
 
 .dashboard-page h2 {
@@ -17,7 +30,29 @@
 .page-title {
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 24px;
+}
+
+/* ================= IMPORT BUTTON ================= */
+
+.import-btn {
+  padding: 10px 18px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.import-btn:hover {
+  background: #1e40af;
+}
+
+.import-btn:focus,
+.import-btn:active {
+  outline: none;
+  box-shadow: none;
 }
 
 /* ================= SUMMARY CARDS ================= */
@@ -32,13 +67,10 @@
 .dash-card {
   background: #ffffff;
   border-radius: 14px;
-  padding: 16px;
+  padding: 18px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease;
-}
-
-.dash-card:hover {
-  transform: translateY(-4px);
+  transition: all 0.25s ease;
+  position: relative;
 }
 
 .dash-card p {
@@ -49,13 +81,55 @@
 .dash-card h1 {
   font-size: 32px;
   margin-top: 8px;
+  font-weight: 700;
 }
 
-/* CARD COLORS */
+/* Clickable behaviour */
+.clickable-card,
+.clickable {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.clickable-card:hover,
+.clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.12);
+}
+
+.clickable-card:active,
+.clickable:active {
+  transform: scale(0.98);
+}
+
+/* Remove blue focus outline */
+.dash-card:focus,
+.dash-card:active,
+.dash-card:focus-visible,
+.clickable-card:focus,
+.clickable-card:focus-visible,
+.clickable:focus,
+.clickable:focus-visible {
+  outline: none;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Remove focus from links if wrapped */
+a:focus,
+a:active,
+a:focus-visible {
+  outline: none;
+  text-decoration: none;
+}
+
+/* ================= CARD COLORS ================= */
+
 .blue { border-left: 6px solid #3b82f6; }
 .green { border-left: 6px solid #22c55e; }
 .orange { border-left: 6px solid #f97316; }
 .purple { border-left: 6px solid #8b5cf6; }
+.teal { border-left: 6px solid #14b8a6; }
+.red { border-left: 6px solid #ef4444; }
 
 /* ================= LOWER GRID ================= */
 
@@ -63,9 +137,9 @@
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 24px;
+  margin-top: 24px;
 }
 
-/* PANEL */
 .dashboard-panel {
   background: #ffffff;
   border-radius: 14px;
@@ -77,9 +151,11 @@
   margin-bottom: 16px;
 }
 
-/* RECENT LEADS */
+/* ================= LIST ITEMS ================= */
+
 .recent-lead,
-.reminder-item {
+.reminder-item,
+.health-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -88,7 +164,8 @@
 }
 
 .recent-lead:last-child,
-.reminder-item:last-child {
+.reminder-item:last-child,
+.health-item:last-child {
   border-bottom: none;
 }
 
@@ -98,7 +175,8 @@
   color: #6b7280;
 }
 
-/* STATUS */
+/* ================= STATUS BADGES ================= */
+
 .status {
   padding: 4px 10px;
   border-radius: 14px;
@@ -121,7 +199,8 @@
   color: #5b21b6;
 }
 
-/* REMINDER TITLES */
+/* ================= REMINDER TITLES ================= */
+
 .reminder-title {
   margin-top: 14px;
   margin-bottom: 6px;
@@ -129,19 +208,10 @@
   font-weight: 600;
 }
 
-.reminder-title.today {
-  color: #166534;
-}
+.reminder-title.today { color: #166534; }
+.reminder-title.overdue { color: #991b1b; }
+.reminder-title.upcoming { color: #1e40af; }
 
-.reminder-title.overdue {
-  color: #991b1b;
-}
-
-.reminder-title.upcoming {
-  color: #1e40af;
-}
-
-/* REMINDER BADGES */
 .reminder-badge.today {
   background: #dcfce7;
   color: #166534;
@@ -157,8 +227,8 @@
   color: #1e40af;
 }
 
+/* ================= STATS ================= */
 
-/* STATS */
 .stats-list {
   list-style: none;
   padding: 0;
@@ -180,52 +250,36 @@
   font-size: 14px;
 }
 
-
-/* NEW COLORS */
-.teal { border-left: 6px solid #14b8a6; }
-.red { border-left: 6px solid #ef4444; }
-
-/* HEALTH SECTION */
-.health-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.health-item:last-child {
-  border-bottom: none;
-}
-
 .danger {
   color: #dc2626;
 }
 
-/* SNAPSHOT */
+/* ================= SNAPSHOT ================= */
+
 .snapshot p {
   margin-bottom: 10px;
   font-size: 14px;
 }
 
-/* Cleaner spacing */
-.dashboard-grid-3 {
-  margin-top: 24px;
+/* Remove default link styling inside dashboard cards */
+.dash-card a {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.dash-card a:hover {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 
-/* ANIMATION */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* ================= RESPONSIVE ================= */
 
-/* RESPONSIVE */
 @media (max-width: 1100px) {
   .dashboard-cards {
     grid-template-columns: 1fr 1fr;
@@ -233,5 +287,32 @@
 
   .dashboard-grid-3 {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dashboard-page {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dashboard-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-card h1 {
+    font-size: 24px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  .import-btn {
+    width: 100%;
   }
 }

@@ -1,6 +1,9 @@
 const db = require("../config/db");
 const XLSX = require("xlsx");
 const path = require("path");
+const pdfParse = require("pdf-parse");
+const fs = require("fs");
+
 
 /* =========================
    CREATE LEAD
@@ -24,13 +27,13 @@ const createLead = (req, res) => {
     quotation_sent,
     project_start,
     snooze_until,
-    description
+    description,
   } = req.body;
 
   if (!name || !phone) {
     return res.status(400).json({
       success: false,
-      message: "Name and phone are required"
+      message: "Name and phone are required",
     });
   }
 
@@ -76,7 +79,7 @@ const createLead = (req, res) => {
     quotation_sent || null,
     project_start || null,
     snooze_until || null,
-    description || null
+    description || null,
   ];
 
   db.query(sql, values, (err, result) => {
@@ -84,13 +87,13 @@ const createLead = (req, res) => {
       console.error("Create lead error:", err);
       return res.status(500).json({
         success: false,
-        message: "Failed to create lead"
+        message: "Failed to create lead",
       });
     }
 
     res.json({
       success: true,
-      leadId: result.insertId
+      leadId: result.insertId,
     });
   });
 };
@@ -99,16 +102,33 @@ const createLead = (req, res) => {
    GET ALL LEADS
 ========================= */
 const getAllLeads = (req, res) => {
-  db.query(
-    "SELECT * FROM leads ORDER BY created_at DESC",
-    (err, results) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Database error" });
-      }
-      res.json({ leads: results });
+  const { role, email } = req.query;
+
+  let sql = `
+    SELECT * FROM leads
+    WHERE deleted_by_admin = 0
+  `;
+
+  // BDA1 or BDA2
+  if (role === "bda1" || role === "bda2") {
+    sql += ` AND assigned_to = '${email}' AND status != 'JUNK_REQUESTED'`;
+  }
+
+  // Admin sees everything except permanently deleted
+  if (role === "admin") {
+    // no extra filter
+  }
+
+  sql += " ORDER BY created_at DESC";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Fetch leads error:", err);
+      return res.status(500).json({ error: "Database error" });
     }
-  );
+
+    res.json({ leads: results });
+  });
 };
 
 /* =========================
@@ -117,17 +137,13 @@ const getAllLeads = (req, res) => {
 const getLeadById = (req, res) => {
   const { id } = req.params;
 
-  db.query(
-    "SELECT * FROM leads WHERE id = ?",
-    [id],
-    (err, results) => {
-      if (err) return res.status(500).json({ error: "DB error" });
-      if (results.length === 0)
-        return res.status(404).json({ error: "Lead not found" });
+  db.query("SELECT * FROM leads WHERE id = ?", [id], (err, results) => {
+    if (err) return res.status(500).json({ error: "DB error" });
+    if (results.length === 0)
+      return res.status(404).json({ error: "Lead not found" });
 
-      res.json({ lead: results[0] });
-    }
-  );
+    res.json({ lead: results[0] });
+  });
 };
 
 /* =========================
@@ -135,20 +151,73 @@ const getLeadById = (req, res) => {
 ========================= */
 const updateLead = (req, res) => {
   const { id } = req.params;
-  const { name, phone, email, source, status } = req.body;
+
+  const {
+    email,
+    city,
+    source,
+    status,
+    call_status,
+    building_type,
+    floors,
+    measurement,
+    sqft,
+    budget,
+    assigned_to,
+    quotation_sent,
+    project_start,
+    snooze_until,
+    description,
+  } = req.body;
+
+  const sql = `
+    UPDATE leads SET
+      email=?,
+      city=?,
+      source=?,
+      status=?,
+      call_status=?,
+      building_type=?,
+      floors=?,
+      measurement=?,
+      sqft=?,
+      budget=?,
+      assigned_to=?,
+      quotation_sent=?,
+      project_start=?,
+      snooze_until=?,
+      description=?
+    WHERE id=?
+  `;
 
   db.query(
-    `UPDATE leads 
-     SET name=?, phone=?, email=?, source=?, status=?
-     WHERE id=?`,
-    [name, phone, email, source, status, id],
+    sql,
+    [
+      email || null,
+      city || null,
+      source || null,
+      status || null,
+      call_status || null,
+      building_type || null,
+      floors || null,
+      measurement || null,
+      sqft || null,
+      budget || null,
+      assigned_to || null,
+      quotation_sent || null,
+      project_start || null,
+      snooze_until || null,
+      description || null,
+      id,
+    ],
     (err) => {
       if (err) {
-        console.error(err);
+        console.error("Update failed:", err);
         return res.status(500).json({ error: "Update failed" });
       }
+
       res.json({ success: true });
-    }
+    },
   );
 };
 
@@ -174,14 +243,11 @@ const addFollowUp = (req, res) => {
       }
 
       if (status) {
-        db.query("UPDATE leads SET status=? WHERE id=?", [
-          status,
-          leadId,
-        ]);
+        db.query("UPDATE leads SET status=? WHERE id=?", [status, leadId]);
       }
 
       res.json({ success: true });
-    }
+    },
   );
 };
 
@@ -194,7 +260,7 @@ const getFollowUps = (req, res) => {
     (err, results) => {
       if (err) return res.status(500).json({ error: "DB error" });
       res.json({ followUps: results });
-    }
+    },
   );
 };
 
@@ -210,7 +276,7 @@ const getTodaysFollowUps = (req, res) => {
     (err, results) => {
       if (err) return res.status(500).json({ error: "DB error" });
       res.json({ todayFollowUps: results });
-    }
+    },
   );
 };
 
@@ -223,7 +289,7 @@ const getPendingFollowUps = (req, res) => {
     (err, results) => {
       if (err) return res.status(500).json({ error: "DB error" });
       res.json({ pendingFollowUps: results });
-    }
+    },
   );
 };
 
@@ -267,7 +333,7 @@ const importLeadsFromExcel = (req, res) => {
       assigned_to = VALUES(assigned_to)
   `;
 
-  const values = rows.map(r => [
+  const values = rows.map((r) => [
     r.name,
     r.phone,
     r.whatsapp || r.phone,
@@ -285,7 +351,7 @@ const importLeadsFromExcel = (req, res) => {
     r.quotation_sent || null,
     r.project_start || null,
     r.snooze_until || null,
-    r.description || null
+    r.description || null,
   ]);
 
   db.query(sql, [values], (err, result) => {
@@ -297,7 +363,6 @@ const importLeadsFromExcel = (req, res) => {
     res.json({ success: true, affectedRows: result.affectedRows });
   });
 };
-
 
 const exportLeadsToExcel = (req, res) => {
   const { status, assigned_to } = req.query;
@@ -321,8 +386,6 @@ const exportLeadsToExcel = (req, res) => {
   });
 };
 
-
-
 /* =========================
    LEAD TIMELINE
 ========================= */
@@ -342,35 +405,19 @@ const getLeadTimeline = (req, res) => {
       }
 
       res.json({ timeline: results });
-    }
+    },
   );
 };
 
-const logLeadActivity = (db, {
-  leadId,
-  user,
-  action,
-  startTime,
-  endTime
-}) => {
+const logLeadActivity = (db, { leadId, user, action, startTime, endTime }) => {
   const duration =
-    startTime && endTime
-      ? Math.floor((endTime - startTime) / 60000)
-      : null;
+    startTime && endTime ? Math.floor((endTime - startTime) / 60000) : null;
 
   db.query(
     `INSERT INTO lead_activity_log
      (lead_id, user_email, user_role, action, start_time, end_time, duration_minutes)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      leadId,
-      user.email,
-      user.role,
-      action,
-      startTime,
-      endTime,
-      duration
-    ]
+    [leadId, user.email, user.role, action, startTime, endTime, duration],
   );
 };
 
@@ -414,20 +461,245 @@ const getDashboardSummary = (req, res) => {
                     db.query(
                       "SELECT COUNT(*) AS pendingFollowUps FROM followups WHERE DATE(next_followup) < CURDATE()",
                       (err, pendingFU) => {
-                        if (err) return res.status(500).json({ error: "DB error" });
-                        summary.pendingFollowUps = pendingFU[0].pendingFollowUps;
+                        if (err)
+                          return res.status(500).json({ error: "DB error" });
+                        summary.pendingFollowUps =
+                          pendingFU[0].pendingFollowUps;
 
                         res.json(summary);
-                      }
+                      },
                     );
-                  }
+                  },
                 );
-              }
+              },
             );
-          }
+          },
         );
-      }
+      },
     );
+  });
+};
+
+const importJustDialPDF = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded" });
+  }
+
+  const fileExt = path.extname(req.file.originalname).toLowerCase();
+
+  // ================= XLSX IMPORT =================
+  if (fileExt === ".xlsx" || fileExt === ".xls") {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    if (!rows.length) {
+      return res.status(400).json({ message: "Empty file" });
+    }
+
+    const values = rows.map((r) => {
+      const keys = Object.keys(r).reduce((acc, key) => {
+        acc[key.toLowerCase()] = r[key];
+        return acc;
+      }, {});
+
+      return [
+        keys["name"] || keys["customer name"] || keys["lead name"] || null,
+        keys["phone"] || keys["mobile"] || keys["phone number"] || null,
+        keys["whatsapp"] || keys["mobile"] || null,
+        keys["email"] || keys["email id"] || null,
+        keys["city"] || null,
+        "JustDial",
+        "New",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        keys["description"] || null,
+      ];
+    });
+
+    const sql = `
+      INSERT INTO leads (
+        name,
+        phone,
+        whatsapp,
+        email,
+        city,
+        source,
+        status,
+        call_status,
+        building_type,
+        floors,
+        measurement,
+        sqft,
+        budget,
+        assigned_to,
+        quotation_sent,
+        project_start,
+        snooze_until,
+        description
+      )
+      VALUES ?
+    `;
+
+    db.query(sql, [values], (err) => {
+      if (err) {
+        console.error("JustDial import error:", err);
+        return res.status(500).json({ error: "Import failed" });
+      }
+
+      res.json({ success: true });
+    });
+  }
+
+  // ================= PDF IMPORT =================
+  else if (fileExt === ".pdf") {
+    const dataBuffer = fs.readFileSync(req.file.path);
+
+    pdfParse(dataBuffer).then((data) => {
+      const lines = data.text.split("\n").filter(l => l.trim() !== "");
+
+      const values = lines.map((line) => {
+        const parts = line.split(" ");
+
+        return [
+          parts[0] || null,
+          parts[1] || null,
+          parts[1] || null,
+          null,
+          null,
+          "JustDial",
+          "New",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ];
+      });
+
+      const sql = `
+        INSERT INTO leads (
+          name,
+          phone,
+          whatsapp,
+          email,
+          city,
+          source,
+          status,
+          call_status,
+          building_type,
+          floors,
+          measurement,
+          sqft,
+          budget,
+          assigned_to,
+          quotation_sent,
+          project_start,
+          snooze_until,
+          description
+        )
+        VALUES ?
+      `;
+
+      db.query(sql, [values], (err) => {
+        if (err) {
+          console.error("PDF import error:", err);
+          return res.status(500).json({ error: "PDF Import failed" });
+        }
+
+        res.json({ success: true });
+      });
+    });
+  }
+
+  else {
+    res.status(400).json({ message: "Unsupported file type" });
+  }
+};
+
+/* =========================
+   REQUEST JUNK (BDA)
+========================= */
+const requestJunk = (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    UPDATE leads
+    SET status = 'JUNK_REQUESTED',
+        junk_requested_at = NOW()
+    WHERE id = ? AND deleted_by_admin = 0
+  `;
+
+  db.query(sql, [id], (err) => {
+    if (err) {
+      console.error("Junk request error:", err);
+      return res.status(500).json({ message: "Failed to request junk" });
+    }
+
+    res.json({ success: true });
+  });
+};
+
+
+/* =========================
+   REASSIGN LEAD (ADMIN)
+========================= */
+const reassignLead = (req, res) => {
+  const { id } = req.params;
+  const { assigned_to } = req.body;
+
+  const sql = `
+    UPDATE leads
+    SET assigned_to = ?,
+        status = 'New',
+        junk_requested_at = NULL
+    WHERE id = ? AND deleted_by_admin = 0
+  `;
+
+  db.query(sql, [assigned_to, id], (err) => {
+    if (err) {
+      console.error("Reassign error:", err);
+      return res.status(500).json({ message: "Reassign failed" });
+    }
+
+    res.json({ success: true });
+  });
+};
+
+
+/* =========================
+   PERMANENT DELETE (ADMIN)
+========================= */
+const permanentDeleteLead = (req, res) => {
+  const { id } = req.params;
+
+  const sql = `
+    UPDATE leads
+    SET deleted_by_admin = 1
+    WHERE id = ?
+  `;
+
+  db.query(sql, [id], (err) => {
+    if (err) {
+      console.error("Permanent delete error:", err);
+      return res.status(500).json({ message: "Delete failed" });
+    }
+
+    res.json({ success: true });
   });
 };
 
@@ -447,5 +719,9 @@ module.exports = {
   exportLeadsToExcel,
   getLeadTimeline,
   logLeadActivity,
-  getDashboardSummary
+  getDashboardSummary,
+  importJustDialPDF,
+  requestJunk,
+  reassignLead,
+  permanentDeleteLead
 };

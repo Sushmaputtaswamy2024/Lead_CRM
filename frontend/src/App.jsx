@@ -11,6 +11,7 @@ import AddLead from "./pages/AddLead";
 import FollowUps from "./pages/FollowUps";
 import Reports from "./pages/Reports";
 import LeadDetails from "./pages/LeadDetails";
+import EditLead from "./pages/EditLead";
 
 export default function App() {
   return (
@@ -32,7 +33,7 @@ export default function App() {
             <Route path="leads/:id" element={<LeadDetails />} />
             <Route path="add-lead" element={<AddLead />} />
             <Route path="follow-ups" element={<FollowUps />} />
-
+            <Route path="leads/edit/:id" element={<EditLead/>} />
             {/* ADMIN ONLY */}
             <Route
               path="reports"

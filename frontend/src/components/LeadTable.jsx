@@ -1,45 +1,160 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import "./LeadTable.css";
 
 export default function LeadTable({ leads }) {
   const navigate = useNavigate();
-
-  console.log("Leads in table:", leads); // 🔴 IMPORTANT
+  const { user } = useAuth();
 
   if (!leads || leads.length === 0) {
-    return <p>No leads found.</p>;
+    return <p className="empty">No leads found.</p>;
   }
 
+  const handleReassign = async (leadId) => {
+    const newAssignee = prompt(
+      "Enter email to reassign (vindiainfrasec@bda1 or vindiainfrasec@bda2):"
+    );
+
+    if (!newAssignee) return;
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/leads/${leadId}/reassign`,
+        { assigned_to: newAssignee }
+      );
+
+      alert("Lead reassigned successfully ✅");
+      window.location.reload();
+    } catch (err) {
+      console.error("Reassign error:", err);
+      alert("Reassign failed ❌");
+    }
+  };
+
+  const handlePermanentDelete = async (leadId) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to permanently delete this lead?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/leads/${leadId}/permanent-delete`
+      );
+
+      alert("Lead permanently deleted 🗑");
+      window.location.reload();
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Delete failed ❌");
+    }
+  };
+
   return (
-    <table border="1" width="100%" cellPadding="8">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>Email</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        {leads.map((lead) => (
-          <tr key={lead.id}>
-            <td
-              style={{ cursor: "pointer", color: "blue" }}
-              onClick={() => navigate(`/leads/${lead.id}`)}
-            >
-              {lead.name}
-            </td>
-            <td>{lead.phone}</td>
-            <td>{lead.email || "-"}</td>
-            <td>{lead.status}</td>
-            <td>
-              <button onClick={() => navigate(`/leads/${lead.id}`)}>
-                View
-              </button>
-            </td>
+    <div className="lead-table-wrapper">
+      <table className="lead-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Source</th>
+            <th>Actions</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+
+        <tbody>
+          {leads.map((lead) => (
+            <tr key={lead.id}>
+              <td
+                className="clickable"
+                onClick={() => navigate(`/leads/${lead.id}`)}
+              >
+                {lead.name}
+              </td>
+
+              <td>{lead.phone}</td>
+              <td>{lead.email || "-"}</td>
+              <td>
+                {lead.status === "JUNK_REQUESTED" ? (
+                  <span style={{ color: "#ef4444", fontWeight: "600" }}>
+                    Junk Requested
+                  </span>
+                ) : (
+                  lead.status
+                )}
+              </td>
+
+              <td>
+                <span
+                  className={`source-badge ${
+                    lead.source?.toLowerCase() || ""
+                  }`}
+                >
+                  {lead.source}
+                </span>
+              </td>
+
+              <td>
+                <div className="action-buttons">
+                  <button
+                    className="view-btn"
+                    onClick={() => navigate(`/leads/${lead.id}`)}
+                  >
+                    View
+                  </button>
+
+                  <button
+                    className="edit-btn"
+                    onClick={() => navigate(`/leads/edit/${lead.id}`)}
+                  >
+                    Edit
+                  </button>
+
+                  {/* ADMIN JUNK ACTIONS */}
+                  {user?.role === "admin" &&
+                    lead.status === "JUNK_REQUESTED" && (
+                      <>
+                        <button
+                          style={{
+                            background: "#2563eb",
+                            color: "white",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            border: "none",
+                            cursor: "pointer"
+                          }}
+                          onClick={() => handleReassign(lead.id)}
+                        >
+                          Reassign
+                        </button>
+
+                        <button
+                          style={{
+                            background: "#ef4444",
+                            color: "white",
+                            padding: "6px 12px",
+                            borderRadius: "6px",
+                            border: "none",
+                            cursor: "pointer"
+                          }}
+                          onClick={() =>
+                            handlePermanentDelete(lead.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </>
+                    )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

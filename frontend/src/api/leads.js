@@ -1,12 +1,20 @@
 import axios from "axios";
 
-const BASE_URL = "http://13.233.XXX.XXX:5000/api";
+const BASE_URL = "http://localhost:5000/api";
 
 /* =======================
    LEADS
 ======================= */
 
-export const fetchLeads = () => axios.get(`${BASE_URL}/leads`);
+export const fetchLeads = (user, showJunk = false) =>
+  axios.get(`${BASE_URL}/leads`, {
+    params: {
+      role: user?.role,
+      email: user?.email,
+      junk: showJunk ? "true" : undefined
+    }
+  });
+
 
 export const fetchLeadById = (id) => axios.get(`${BASE_URL}/leads/${id}`);
 

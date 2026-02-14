@@ -1,20 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 import "./FollowUps.css";
 
 export default function FollowUps() {
   const [today, setToday] = useState([]);
   const [pending, setPending] = useState([]);
+  const location = useLocation();
 
+  // Refs for smooth scrolling
+  const todayRef = useRef(null);
+  const pendingRef = useRef(null);
+
+  /* ================= FETCH DATA ================= */
   useEffect(() => {
     async function fetchData() {
       try {
         const todayRes = await axios.get(
-          "http://13.233.XXX.XXX:5000/api/leads/followups/today"
+          "http://localhost:5000/api/leads/followups/today"
         );
 
         const pendingRes = await axios.get(
-          "http://13.233.XXX.XXX:5000/api/leads/followups/pending"
+          "http://localhost:5000/api/leads/followups/pending"
         );
 
         setToday(todayRes.data.todayFollowUps || []);
@@ -27,12 +34,27 @@ export default function FollowUps() {
     fetchData();
   }, []);
 
+  /* ================= HANDLE DASHBOARD FILTER ================= */
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filter = params.get("filter");
+
+    if (filter === "today" && todayRef.current) {
+      todayRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+
+    if (filter === "pending" && pendingRef.current) {
+      pendingRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [location.search]);
+
   const total = today.length + pending.length;
 
   return (
     <div className="followups-page">
       <h2 className="page-title">Follow Ups</h2>
 
+      {/* ================= SUMMARY CARDS ================= */}
       <div className="followup-summary">
         <div className="summary-card today">
           <p>Today</p>
@@ -50,14 +72,17 @@ export default function FollowUps() {
         </div>
       </div>
 
+      {/* ================= FOLLOWUP GRID ================= */}
       <div className="followup-grid">
-        <div className="followup-column">
+        
+        {/* TODAY COLUMN */}
+        <div className="followup-column" ref={todayRef}>
           <h3>Today Follow Ups</h3>
 
           {today.length === 0 ? (
             <p className="empty">No follow-ups today.</p>
           ) : (
-            today.map(f => (
+            today.map((f) => (
               <div key={f.id} className="task-card">
                 <div>
                   <h4>{f.name}</h4>
@@ -69,13 +94,14 @@ export default function FollowUps() {
           )}
         </div>
 
-        <div className="followup-column">
+        {/* PENDING COLUMN */}
+        <div className="followup-column" ref={pendingRef}>
           <h3>Pending Follow Ups</h3>
 
           {pending.length === 0 ? (
             <p className="empty">No pending follow-ups.</p>
           ) : (
-            pending.map(f => (
+            pending.map((f) => (
               <div key={f.id} className="task-card">
                 <div>
                   <h4>{f.name}</h4>
@@ -86,6 +112,7 @@ export default function FollowUps() {
             ))
           )}
         </div>
+
       </div>
     </div>
   );

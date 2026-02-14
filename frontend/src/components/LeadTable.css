@@ -1,0 +1,109 @@
+.lead-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.lead-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.lead-table thead {
+  background: #f3f4f6;
+}
+
+.lead-table th,
+.lead-table td {
+  padding: 14px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.lead-table th {
+  font-weight: 600;
+  color: #374151;
+}
+
+.lead-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.clickable {
+  cursor: pointer;
+  /* color: #2563eb; */
+  font-weight: 500;
+}
+
+/* .clickable:hover {
+  text-decoration: underline;
+} */
+
+/* ACTION BUTTONS */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.view-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.view-btn:hover {
+  background: #1e40af;
+}
+
+.edit-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.edit-btn:hover {
+  background: #15803d;
+}
+
+/* SOURCE BADGES */
+.source-badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.source-badge.justdial {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.source-badge.meta {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.source-badge.manual {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.empty {
+  padding: 20px;
+  font-size: 14px;
+  color: #6b7280;
+}

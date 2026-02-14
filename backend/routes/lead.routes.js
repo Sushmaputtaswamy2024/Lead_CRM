@@ -13,7 +13,12 @@ const {
   getPendingFollowUps,
   importLeadsFromExcel,
   exportLeadsToExcel,
-  getDashboardSummary
+  getDashboardSummary,
+  importJustDialPDF,
+  requestJunk,
+  reassignLead,
+  permanentDeleteLead
+
 } = require("../controllers/lead.controller");
 
 // =========================
@@ -39,9 +44,19 @@ router.get("/", getAllLeads);
 router.post("/:leadId/followups", addFollowUp);
 router.get("/:leadId/followups", getFollowUps);
 
+
+router.post("/upload-justdial", upload.single("file"),importJustDialPDF);
+
 // =========================
 // DYNAMIC ROUTES LAST
 router.get("/:id", getLeadById);
 router.put("/:id", updateLead);
+
+// =========================
+// JUNK / ADMIN ACTIONS
+router.put("/:id/request-junk", requestJunk);
+router.put("/:id/reassign", reassignLead);
+router.put("/:id/permanent-delete", permanentDeleteLead);
+
 
 module.exports = router;

@@ -84,8 +84,18 @@ export default function AddLead() {
         <div className="card animate">
           <h3>Lead Details</h3>
 
-          <input name="name" placeholder="Name" onChange={handleChange} required />
-          <input name="phone" placeholder="Phone" onChange={handleChange} required />
+          <input
+            name="name"
+            placeholder="Name"
+            onChange={handleChange}
+            required
+          />
+          <input
+            name="phone"
+            placeholder="Phone"
+            onChange={handleChange}
+            required
+          />
 
           <label className="checkbox">
             <input
@@ -97,7 +107,11 @@ export default function AddLead() {
           </label>
 
           {!sameWhatsapp && (
-            <input name="whatsapp" placeholder="WhatsApp Number" onChange={handleChange} />
+            <input
+              name="whatsapp"
+              placeholder="WhatsApp Number"
+              onChange={handleChange}
+            />
           )}
 
           <input name="email" placeholder="Email" onChange={handleChange} />
@@ -107,12 +121,19 @@ export default function AddLead() {
             <option value="">Call Status</option>
             <option>Connected</option>
             <option>Not Connected</option>
+            <option>Switch Off</option>
           </select>
 
           <select name="building_type" onChange={handleChange}>
             <option value="">Building Type</option>
             <option>Residential</option>
             <option>Commercial</option>
+            <option>Interior Decorators</option>
+            <option>Architects</option>
+            <option>False Ceiling</option>
+            <option>Builders</option>
+            <option>Interior Designers</option>
+            <option>Building Contractors</option>
           </select>
 
           <select name="floors" onChange={handleChange}>
@@ -120,10 +141,19 @@ export default function AddLead() {
             <option>G</option>
             <option>G+1</option>
             <option>G+2</option>
+            <option>G+3</option>
           </select>
 
-          <input name="measurement" placeholder="Measurement" onChange={handleChange} />
-          <input name="sqft" placeholder="Square Feet" onChange={handleChange} />
+          <input
+            name="measurement"
+            placeholder="Measurement"
+            onChange={handleChange}
+          />
+          <input
+            name="sqft"
+            placeholder="Square Feet"
+            onChange={handleChange}
+          />
           <input name="budget" placeholder="Budget" onChange={handleChange} />
 
           <textarea
@@ -172,11 +202,21 @@ export default function AddLead() {
           <div className="radio-group">
             <p>Quotation Sent</p>
             <label>
-              <input type="radio" name="quotation_sent" value="Yes" onChange={handleChange} />
+              <input
+                type="radio"
+                name="quotation_sent"
+                value="Yes"
+                onChange={handleChange}
+              />
               Yes
             </label>
             <label>
-              <input type="radio" name="quotation_sent" value="No" defaultChecked />
+              <input
+                type="radio"
+                name="quotation_sent"
+                value="No"
+                defaultChecked
+              />
               No
             </label>
           </div>
