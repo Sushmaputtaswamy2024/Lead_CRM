@@ -4,7 +4,6 @@ const path = require("path");
 const pdfParse = require("pdf-parse");
 const fs = require("fs");
 
-
 /* =========================
    CREATE LEAD
 ========================= */
@@ -28,6 +27,9 @@ const createLead = (req, res) => {
     project_start,
     snooze_until,
     description,
+    date_and_time,
+    search_category,
+    area,
   } = req.body;
 
   if (!name || !phone) {
@@ -56,9 +58,12 @@ const createLead = (req, res) => {
       quotation_sent,
       project_start,
       snooze_until,
-      description
+      description,
+      date_and_time,
+      search_category,
+      area
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -80,6 +85,9 @@ const createLead = (req, res) => {
     project_start || null,
     snooze_until || null,
     description || null,
+    date_and_time || null,
+    search_category || null,
+    area || null,
   ];
 
   db.query(sql, values, (err, result) => {
@@ -111,12 +119,11 @@ const getAllLeads = (req, res) => {
 
   // BDA1 or BDA2
   if (role === "bda1" || role === "bda2") {
-  sql += ` 
+    sql += ` 
     AND (assigned_to = '${email}' OR assigned_to IS NULL)
     AND status != 'JUNK_REQUESTED'
   `;
-}
-
+  }
 
   // Admin sees everything except permanently deleted
   if (role === "admin") {
@@ -172,6 +179,9 @@ const updateLead = (req, res) => {
     project_start,
     snooze_until,
     description,
+    date_and_time,
+    search_category,
+    area,
   } = req.body;
 
   const sql = `
@@ -190,7 +200,10 @@ const updateLead = (req, res) => {
       quotation_sent=?,
       project_start=?,
       snooze_until=?,
-      description=?
+      description=?,
+      date_and_time=?,
+      search_category=?,
+      area=?
     WHERE id=?
   `;
 
@@ -212,6 +225,10 @@ const updateLead = (req, res) => {
       project_start || null,
       snooze_until || null,
       description || null,
+      date_and_time || null,
+      search_category || null,
+      area || null,
+
       id,
     ],
     (err) => {
@@ -301,9 +318,61 @@ const getPendingFollowUps = (req, res) => {
    EXCEL IMPORT / EXPORT
 ========================= */
 const importLeadsFromExcel = (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
+
   const workbook = XLSX.readFile(req.file.path);
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(sheet);
+
+  if (!rows.length) {
+    return res.status(400).json({ error: "Excel file is empty" });
+  }
+
+  const values = rows
+    .map((r) => {
+      const keys = Object.keys(r).reduce((acc, key) => {
+        acc[key.toLowerCase().trim()] = r[key];
+        return acc;
+      }, {});
+
+      const name = keys["name"];
+      const phone = keys["phone"];
+
+      if (!name || !phone) return null;
+
+      return [
+        String(name).trim(),
+        String(phone).trim(),
+        String(phone).trim(),
+        keys["email"] || null,
+        keys["city"] || null,
+        keys["source"] || "Excel",
+        keys["status"] || "New",
+        keys["call_status"] || null,
+        keys["building_type"] || null,
+        keys["floors"] || null,
+        keys["measurement"] || null,
+        keys["sqft"] || null,
+        keys["budget"] || null,
+        keys["assigned_to"] || null,
+        keys["quotation_sent"] || null,
+        keys["project_start"] || null,
+        keys["snooze_until"] || null,
+        keys["description"] || null,
+        keys["date_and_time"] || null,
+        keys["search_category"] || null,
+        keys["area"] || null,
+      ];
+    })
+    .filter(Boolean);
+
+  if (!values.length) {
+    return res.status(400).json({
+      error: "No valid rows found in Excel",
+    });
+  }
 
   const sql = `
     INSERT INTO leads (
@@ -324,39 +393,23 @@ const importLeadsFromExcel = (req, res) => {
       quotation_sent,
       project_start,
       snooze_until,
-      description
+      description,
+      date_and_time,
+      search_category,
+      area
     )
     VALUES ?
     ON DUPLICATE KEY UPDATE
-      name = VALUES(name),
       email = VALUES(email),
       city = VALUES(city),
       status = VALUES(status),
       source = VALUES(source),
       budget = VALUES(budget),
+      date_and_time = VALUES(date_and_time),
+      search_category = VALUES(search_category),
+      area = VALUES(area),
       assigned_to = VALUES(assigned_to)
   `;
-
-  const values = rows.map((r) => [
-    r.name,
-    r.phone,
-    r.whatsapp || r.phone,
-    r.email || null,
-    r.city || null,
-    r.source || "Excel",
-    r.status || "New",
-    r.call_status || null,
-    r.building_type || null,
-    r.floors || null,
-    r.measurement || null,
-    r.sqft || null,
-    r.budget || null,
-    r.assigned_to || null,
-    r.quotation_sent || null,
-    r.project_start || null,
-    r.snooze_until || null,
-    r.description || null,
-  ]);
 
   db.query(sql, [values], (err, result) => {
     if (err) {
@@ -415,13 +468,18 @@ const getLeadTimeline = (req, res) => {
 
 const logLeadActivity = (db, { leadId, user, action, startTime, endTime }) => {
   const duration =
-  startTime && endTime
-    ? Math.floor(
-        (new Date(endTime).getTime() -
-         new Date(startTime).getTime()) / 60000
-      )
-    : null;
+    startTime && endTime
+      ? Math.floor(
+          (new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000,
+        )
+      : null;
 
+  db.query(
+    `INSERT INTO lead_activity_log
+     (lead_id, user_email, user_role, action, start_time, end_time, duration_minutes)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [leadId, user.email, user.role, action, startTime, endTime, duration],
+  );
 };
 
 const getDashboardSummary = (req, res) => {
@@ -490,27 +548,61 @@ const importJustDialPDF = (req, res) => {
 
   const fileExt = path.extname(req.file.originalname).toLowerCase();
 
-  // ================= XLSX IMPORT =================
-  if (fileExt === ".xlsx" || fileExt === ".xls") {
-    const workbook = XLSX.readFile(req.file.path);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
+  /* ================= XLSX IMPORT ================= */
+ if (fileExt === ".xlsx" || fileExt === ".xls") {
+  const workbook = XLSX.readFile(req.file.path);
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(sheet);
 
-    if (!rows.length) {
-      return res.status(400).json({ message: "Empty file" });
-    }
+  if (!rows.length) {
+    return res.status(400).json({ message: "Empty file" });
+  }
 
-    const values = rows.map((r) => {
+  const values = rows
+    .map((r) => {
       const keys = Object.keys(r).reduce((acc, key) => {
-        acc[key.toLowerCase()] = r[key];
+        acc[key.toLowerCase().trim()] = r[key];
         return acc;
       }, {});
 
+      const name =
+        keys["customer name"] ||
+        keys["user name"] ||
+        keys["name"] ||
+        null;
+
+      const phone =
+        keys["user number"] ||
+        keys["mobile no"] ||
+        keys["mobile"] ||
+        keys["phone"] ||
+        null;
+
+      if (!name || !phone) return null;
+
+      // ✅ Convert date format
+      let formattedDate = null;
+      const rawDate =
+        keys["date and time"] ||
+        keys["date & time"] ||
+        keys["date_and_time"];
+
+      if (rawDate) {
+        const cleaned = rawDate.replace(",", "").trim(); 
+        // "16/02/2026 10:19"
+
+        const [datePart, timePart] = cleaned.split(" ");
+        if (datePart && timePart) {
+          const [day, month, year] = datePart.split("/");
+          formattedDate = `${year}-${month}-${day} ${timePart}:00`;
+        }
+      }
+
       return [
-        keys["name"] || keys["customer name"] || keys["lead name"] || null,
-        keys["phone"] || keys["mobile"] || keys["phone number"] || null,
-        keys["whatsapp"] || keys["mobile"] || null,
-        keys["email"] || keys["email id"] || null,
+        String(name).trim(),
+        String(phone).trim(),
+        String(phone).trim(),
+        keys["user email"] || keys["email"] || null,
         keys["city"] || null,
         "JustDial",
         "New",
@@ -524,75 +616,102 @@ const importJustDialPDF = (req, res) => {
         null,
         null,
         null,
-        keys["description"] || null,
+        null,
+        formattedDate,
+        keys["search category"] || null,
+        keys["area"] || null,
       ];
-    });
+    })
+    .filter(Boolean);
 
-    const sql = `
-      INSERT INTO leads (
-        name,
-        phone,
-        whatsapp,
-        email,
-        city,
-        source,
-        status,
-        call_status,
-        building_type,
-        floors,
-        measurement,
-        sqft,
-        budget,
-        assigned_to,
-        quotation_sent,
-        project_start,
-        snooze_until,
-        description
-      )
-      VALUES ?
-    `;
-
-    db.query(sql, [values], (err) => {
-      if (err) {
-        console.error("JustDial import error:", err);
-        return res.status(500).json({ error: "Import failed" });
-      }
-
-      res.json({ success: true });
+  if (!values.length) {
+    return res.status(400).json({
+      error: "No valid rows found in JustDial Excel",
     });
   }
 
-  // ================= PDF IMPORT =================
+  const sql = `
+    INSERT INTO leads (
+      name,
+      phone,
+      whatsapp,
+      email,
+      city,
+      source,
+      status,
+      call_status,
+      building_type,
+      floors,
+      measurement,
+      sqft,
+      budget,
+      assigned_to,
+      quotation_sent,
+      project_start,
+      snooze_until,
+      description,
+      date_and_time,
+      search_category,
+      area
+    )
+    VALUES ?
+  `;
+
+  db.query(sql, [values], (err) => {
+    if (err) {
+      console.error("JustDial import error:", err);
+      return res.status(500).json({ error: "Import failed" });
+    }
+
+    res.json({ success: true });
+  });
+}
+
+
+  /* ================= PDF IMPORT ================= */
   else if (fileExt === ".pdf") {
     const dataBuffer = fs.readFileSync(req.file.path);
 
     pdfParse(dataBuffer).then((data) => {
-      const lines = data.text.split("\n").filter(l => l.trim() !== "");
+      const lines = data.text.split("\n").filter((l) => l.trim() !== "");
 
-      const values = lines.map((line) => {
-        const parts = line.split(" ");
+      const values = lines
+        .map((line) => {
+          const parts = line.split(" ");
 
-        return [
-          parts[0] || null,
-          parts[1] || null,
-          parts[1] || null,
-          null,
-          null,
-          "JustDial",
-          "New",
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ];
-      });
+          if (!parts[0] || !parts[1]) return null;
+
+          return [
+            parts[0],
+            parts[1],
+            parts[1],
+            null,
+            null,
+            "JustDial",
+            "New",
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+          ];
+        })
+        .filter(Boolean);
+
+      if (!values.length) {
+        return res.status(400).json({
+          error: "No valid rows found in PDF",
+        });
+      }
 
       const sql = `
         INSERT INTO leads (
@@ -613,7 +732,10 @@ const importJustDialPDF = (req, res) => {
           quotation_sent,
           project_start,
           snooze_until,
-          description
+          description,
+          date_and_time,
+          search_category,
+          area
         )
         VALUES ?
       `;
@@ -634,6 +756,9 @@ const importJustDialPDF = (req, res) => {
   }
 };
 
+
+  // ================= PDF IMPORT =================
+  
 /* =========================
    REQUEST JUNK (BDA)
 ========================= */
@@ -656,7 +781,6 @@ const requestJunk = (req, res) => {
     res.json({ success: true });
   });
 };
-
 
 /* =========================
    REASSIGN LEAD (ADMIN)
@@ -682,7 +806,6 @@ const reassignLead = (req, res) => {
     res.json({ success: true });
   });
 };
-
 
 /* =========================
    PERMANENT DELETE (ADMIN)
@@ -726,5 +849,5 @@ module.exports = {
   importJustDialPDF,
   requestJunk,
   reassignLead,
-  permanentDeleteLead
+  permanentDeleteLead,
 };

@@ -93,6 +93,29 @@ export default function EditLead() {
         </div>
 
         <div className="form-group">
+          <label>Date & Time</label>
+          <input
+            name="date_and_time"
+            value={form.date_and_time || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Search Category</label>
+          <input
+            name="search_category"
+            value={form.search_category || ""}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Area</label>
+          <input name="area" value={form.area || ""} onChange={handleChange} />
+        </div>
+
+        <div className="form-group">
           <label>Status</label>
           <select
             name="status"

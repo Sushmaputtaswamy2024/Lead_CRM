@@ -75,33 +75,11 @@ export default function LeadTable({ leads }) {
                 {lead.name}
 
                 {user?.role !== "admin" && lead.assigned_to === user.email && (
-                  <span
-                    style={{
-                      marginLeft: "8px",
-                      padding: "2px 6px",
-                      fontSize: "11px",
-                      background: "#22c55e",
-                      color: "white",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    Assigned to You
-                  </span>
+                  <span className="badge-assigned">Assigned to You</span>
                 )}
 
                 {user?.role !== "admin" && !lead.assigned_to && (
-                  <span
-                    style={{
-                      marginLeft: "8px",
-                      padding: "2px 6px",
-                      fontSize: "11px",
-                      background: "#f59e0b",
-                      color: "white",
-                      borderRadius: "6px",
-                    }}
-                  >
-                    Unassigned
-                  </span>
+                  <span className="badge-unassigned">Unassigned</span>
                 )}
               </td>
 
