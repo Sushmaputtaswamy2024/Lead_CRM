@@ -32,6 +32,7 @@ export default function AddLead() {
 
     assigned_to: "",
     quotation_sent: "No",
+    designs_sent: "0", // ✅ NEW FIELD
 
     project_start: "",
     snooze_until: "",
@@ -66,7 +67,12 @@ export default function AddLead() {
     const snoozeDate = calculateSnooze();
 
     try {
-      await addLead({ ...form, snooze_until: snoozeDate });
+      await addLead({
+        ...form,
+        designs_sent: Number(form.designs_sent), // ensure number
+        snooze_until: snoozeDate,
+      });
+
       alert("Lead added successfully");
       navigate("/leads");
     } catch (err) {
@@ -80,22 +86,12 @@ export default function AddLead() {
       <h2>Add Lead</h2>
 
       <form className="add-lead-grid" onSubmit={handleSubmit}>
-        {/* LEFT */}
+        {/* LEFT SECTION */}
         <div className="card animate">
           <h3>Lead Details</h3>
 
-          <input
-            name="name"
-            placeholder="Name"
-            onChange={handleChange}
-            required
-          />
-          <input
-            name="phone"
-            placeholder="Phone"
-            onChange={handleChange}
-            required
-          />
+          <input name="name" placeholder="Name" onChange={handleChange} required />
+          <input name="phone" placeholder="Phone" onChange={handleChange} required />
 
           <label className="checkbox">
             <input
@@ -144,16 +140,8 @@ export default function AddLead() {
             <option>G+3</option>
           </select>
 
-          <input
-            name="measurement"
-            placeholder="Measurement"
-            onChange={handleChange}
-          />
-          <input
-            name="sqft"
-            placeholder="Square Feet"
-            onChange={handleChange}
-          />
+          <input name="measurement" placeholder="Measurement" onChange={handleChange} />
+          <input name="sqft" placeholder="Square Feet" onChange={handleChange} />
           <input name="budget" placeholder="Budget" onChange={handleChange} />
 
           <textarea
@@ -188,7 +176,7 @@ export default function AddLead() {
           </div>
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT SECTION */}
         <div className="card assignment-card animate">
           <h3>Assignment</h3>
 
@@ -218,6 +206,19 @@ export default function AddLead() {
               />
               No
             </label>
+          </div>
+
+          {/* ✅ NEW DESIGNS SENT DROPDOWN */}
+          <div className="designs-section">
+            <p>Designs Sent</p>
+            <select name="designs_sent" value={form.designs_sent} onChange={handleChange}>
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5+</option>
+            </select>
           </div>
 
           <button className="primary-btn" type="submit">

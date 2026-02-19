@@ -24,7 +24,7 @@ export default function Reports() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/reports/activity-logs")
+      .get("/api/reports/activity-logs")
       .then(res => setActivityLogs(res.data.data || []))
       .catch(console.error);
 
@@ -72,21 +72,21 @@ export default function Reports() {
 
 const downloadAllLeads = () => {
   downloadFile(
-    "http://localhost:5000/api/leads/export",
+    "/api/leads/export",
     "All_Leads.xlsx"
   );
 };
 
 const downloadInterestedLeads = () => {
   downloadFile(
-    "http://localhost:5000/api/leads/export?status=Interested",
+    "/api/leads/export?status=Interested",
     "Interested_Leads.xlsx"
   );
 };
 
 const downloadReports = () => {
   downloadFile(
-    "http://localhost:5000/api/reports/export",
+    "/api/reports/export",
     "Full_Report.xlsx"
   );
 };

@@ -42,5 +42,5 @@ app.use("/api/auth", authRoutes);
 // ================= SERVER START =================
 const PORT = 5000;
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ Backend running on http://localhost:${PORT}`);
+  console.log(`✅ Backend running on :${PORT}`);
 });

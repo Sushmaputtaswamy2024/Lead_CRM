@@ -1,13 +1,12 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api";
 
 /* =======================
    LEADS
 ======================= */
 
 export const fetchLeads = (user, showJunk = false) =>
-  axios.get(`${BASE_URL}/leads`, {
+  axios.get(`/leads`, {
     params: {
       role: user?.role,
       email: user?.email,
@@ -16,31 +15,31 @@ export const fetchLeads = (user, showJunk = false) =>
   });
 
 
-export const fetchLeadById = (id) => axios.get(`${BASE_URL}/leads/${id}`);
+export const fetchLeadById = (id) => axios.get(`/leads/${id}`);
 
-export const addLead = (data) => axios.post(`${BASE_URL}/leads`, data);
+export const addLead = (data) => axios.post(`/leads`, data);
 
-export const updateLead = (id, data) => axios.put(`${BASE_URL}/leads/${id}`, data);
+export const updateLead = (id, data) => axios.put(`/leads/${id}`, data);
 
 /* =======================
    FOLLOW UPS (GLOBAL)
 ======================= */
 
-export const fetchTodayFollowUps = () => axios.get(`${BASE_URL}/followups/today`);
+export const fetchTodayFollowUps = () => axios.get(`/followups/today`);
 
 export const fetchPendingFollowUps = () =>
-  axios.get(`${BASE_URL}/followups/pending`);
+  axios.get(`/followups/pending`);
 
 /* =======================
    FOLLOW UPS (BY LEAD)
 ======================= */
 
 export const fetchFollowUpsByLead = (leadId) =>
-  axios.get(`${BASE_URL}/leads/${leadId}/followups`);
+  axios.get(`/leads/${leadId}/followups`);
 
 /* =======================
    TIMELINE
 ======================= */
 
 export const fetchLeadTimeline = (leadId) =>
-  axios.get(`${BASE_URL}/leads/${leadId}/timeline`);
+  axios.get(`/leads/${leadId}/timeline`);

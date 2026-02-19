@@ -30,6 +30,7 @@ const createLead = (req, res) => {
     date_and_time,
     search_category,
     area,
+    designs_sent,   // ✅ ADDED
   } = req.body;
 
   if (!name || !phone) {
@@ -61,9 +62,10 @@ const createLead = (req, res) => {
       description,
       date_and_time,
       search_category,
-      area
+      area,
+      designs_sent   -- ✅ ADDED
     )
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -88,6 +90,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     date_and_time || null,
     search_category || null,
     area || null,
+    designs_sent || 0,   // ✅ ADDED
   ];
 
   db.query(sql, values, (err, result) => {
@@ -182,30 +185,33 @@ const updateLead = (req, res) => {
     date_and_time,
     search_category,
     area,
+    designs_sent,   // ✅ ADDED
   } = req.body;
 
   const sql = `
-    UPDATE leads SET
-      email=?,
-      city=?,
-      source=?,
-      status=?,
-      call_status=?,
-      building_type=?,
-      floors=?,
-      measurement=?,
-      sqft=?,
-      budget=?,
-      assigned_to=?,
-      quotation_sent=?,
-      project_start=?,
-      snooze_until=?,
-      description=?,
-      date_and_time=?,
-      search_category=?,
-      area=?
-    WHERE id=?
-  `;
+  UPDATE leads SET
+    email=?,
+    city=?,
+    source=?,
+    status=?,
+    call_status=?,
+    building_type=?,
+    floors=?,
+    measurement=?,
+    sqft=?,
+    budget=?,
+    assigned_to=?,
+    quotation_sent=?,
+    project_start=?,
+    snooze_until=?,
+    description=?,
+    date_and_time=?,
+    search_category=?,
+    area=?,
+    designs_sent=?
+  WHERE id=?
+`;
+
 
   db.query(
     sql,
@@ -228,7 +234,7 @@ const updateLead = (req, res) => {
       date_and_time || null,
       search_category || null,
       area || null,
-
+      designs_sent || 0,  // ✅ ADDED
       id,
     ],
     (err) => {
@@ -238,7 +244,7 @@ const updateLead = (req, res) => {
       }
 
       res.json({ success: true });
-    },
+    }
   );
 };
 

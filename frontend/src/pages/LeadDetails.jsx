@@ -12,7 +12,6 @@ export default function LeadDetails() {
   const [lead, setLead] = useState(null);
   const [followUps, setFollowUps] = useState([]);
 
-  // PAGINATION STATE
   const [currentPage, setCurrentPage] = useState(1);
   const followupsPerPage = 5;
 
@@ -22,23 +21,23 @@ export default function LeadDetails() {
     const fetchDataAndStartSession = async () => {
       try {
         const leadRes = await axios.get(
-          `http://localhost:5000/api/leads/${id}`,
+          `/api/leads/${id}`
         );
         setLead(leadRes.data.lead);
 
         const followRes = await axios.get(
-          `http://localhost:5000/api/leads/${id}/followups`,
+          `/api/leads/${id}/followups`
         );
         setFollowUps(followRes.data.followUps || []);
 
         if (user?.email) {
           const sessionRes = await axios.post(
-            "http://localhost:5000/api/reports/start-session",
+            "/api/reports/start-session",
             {
               lead_id: id,
               user_email: user.email,
               user_role: user.role,
-            },
+            }
           );
 
           activeSessionId = sessionRes.data.sessionId;
@@ -52,7 +51,7 @@ export default function LeadDetails() {
 
     return () => {
       if (activeSessionId) {
-        axios.post("http://localhost:5000/api/reports/end-session", {
+        axios.post("/api/reports/end-session", {
           session_id: activeSessionId,
         });
       }
@@ -64,24 +63,30 @@ export default function LeadDetails() {
   const todayDate = new Date().toISOString().slice(0, 10);
 
   const todayCount = followUps.filter(
-    (f) => f.next_followup && f.next_followup.slice(0, 10) === todayDate,
+    (f) => f.next_followup && f.next_followup.slice(0, 10) === todayDate
   ).length;
 
   const pendingCount = followUps.filter(
-    (f) => f.next_followup && f.next_followup.slice(0, 10) < todayDate,
+    (f) => f.next_followup && f.next_followup.slice(0, 10) < todayDate
   ).length;
 
   const totalCount = followUps.length;
 
-  // PAGINATION LOGIC
   const indexOfLast = currentPage * followupsPerPage;
   const indexOfFirst = indexOfLast - followupsPerPage;
   const currentFollowUps = followUps.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(followUps.length / followupsPerPage);
 
+  const formatDate = (date) => {
+    if (!date) return "-";
+    return new Date(date).toLocaleDateString("en-IN");
+  };
+
+  const designCount = lead.designs_sent ?? 0;
+
   return (
     <div className="lead-details-page">
-      {/* HEADER */}
+
       <div className="details-header">
         <h2>Lead Details</h2>
 
@@ -93,62 +98,42 @@ export default function LeadDetails() {
         </button>
       </div>
 
-      {/* LEAD INFO */}
       <div className="lead-info">
+
+        <p><b>Name:</b> {lead.name}</p>
+        <p><b>Phone:</b> {lead.phone}</p>
+        <p><b>WhatsApp:</b> {lead.whatsapp}</p>
+        <p><b>Email:</b> {lead.email || "-"}</p>
+        <p><b>City:</b> {lead.city || "-"}</p>
+        <p><b>Status:</b> {lead.status}</p>
+        <p><b>Call Status:</b> {lead.call_status || "-"}</p>
+        <p><b>Building Type:</b> {lead.building_type || "-"}</p>
+        <p><b>Floors:</b> {lead.floors || "-"}</p>
+        <p><b>Measurement:</b> {lead.measurement || "-"}</p>
+        <p><b>Sqft:</b> {lead.sqft || "-"}</p>
+        <p><b>Budget:</b> {lead.budget || "-"}</p>
+        <p><b>Assigned To:</b> {lead.assigned_to || "-"}</p>
+        <p><b>Quotation Sent:</b> {lead.quotation_sent || "-"}</p>
+
+        {/* ⭐ DESIGNS SENT VISUAL BADGE */}
         <p>
-          <b>Name:</b> {lead.name}
+          <b>Designs Sent:</b>{" "}
+          <span
+            className={
+              designCount > 0
+                ? "design-count-badge active"
+                : "design-count-badge zero"
+            }
+          >
+            {designCount}
+          </span>
         </p>
-        <p>
-          <b>Phone:</b> {lead.phone}
-        </p>
-        <p>
-          <b>WhatsApp:</b> {lead.whatsapp}
-        </p>
-        <p>
-          <b>Email:</b> {lead.email || "-"}
-        </p>
-        <p>
-          <b>City:</b> {lead.city || "-"}
-        </p>
-        <p>
-          <b>Status:</b> {lead.status}
-        </p>
-        <p>
-          <b>Call Status:</b> {lead.call_status || "-"}
-        </p>
-        <p>
-          <b>Building Type:</b> {lead.building_type || "-"}
-        </p>
-        <p>
-          <b>Floors:</b> {lead.floors || "-"}
-        </p>
-        <p>
-          <b>Measurement:</b> {lead.measurement || "-"}
-        </p>
-        <p>
-          <b>Sqft:</b> {lead.sqft || "-"}
-        </p>
-        <p>
-          <b>Budget:</b> {lead.budget || "-"}
-        </p>
-        <p>
-          <b>Assigned To:</b> {lead.assigned_to || "-"}
-        </p>
-        <p>
-          <b>Quotation Sent:</b> {lead.quotation_sent || "-"}
-        </p>
-        <p>
-          <b>Project Start:</b> {lead.project_start || "-"}
-        </p>
-        <p>
-          <b>Snooze Until:</b> {lead.snooze_until || "-"}
-        </p>
-        <p>
-          <b>Description:</b> {lead.description || "-"}
-        </p>
+
+        <p><b>Project Start:</b> {formatDate(lead.project_start)}</p>
+        <p><b>Snooze Until:</b> {formatDate(lead.snooze_until)}</p>
+        <p><b>Description:</b> {lead.description || "-"}</p>
       </div>
 
-      {/* FOLLOWUP SECTION */}
       <h3>Follow Ups</h3>
 
       <div className="followup-summary">
@@ -172,22 +157,14 @@ export default function LeadDetails() {
         <p className="empty">No follow-ups for this lead.</p>
       )}
 
-      {/* FOLLOWUP LIST */}
       {currentFollowUps.map((f) => (
         <div key={f.id} className="followup-item">
-          <p>
-            <b>Note:</b> {f.note}
-          </p>
-          <p>
-            <b>Status:</b> {f.status}
-          </p>
-          <p>
-            <b>Next Followup:</b> {f.next_followup}
-          </p>
+          <p><b>Note:</b> {f.note}</p>
+          <p><b>Status:</b> {f.status}</p>
+          <p><b>Next Followup:</b> {formatDate(f.next_followup)}</p>
         </div>
       ))}
 
-      {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="pagination">
           <button

@@ -17,11 +17,11 @@ export default function FollowUps() {
     async function fetchData() {
       try {
         const todayRes = await axios.get(
-          "http://localhost:5000/api/leads/followups/today"
+          "/api/leads/followups/today"
         );
 
         const pendingRes = await axios.get(
-          "http://localhost:5000/api/leads/followups/pending"
+          "/api/leads/followups/pending"
         );
 
         setToday(todayRes.data.todayFollowUps || []);

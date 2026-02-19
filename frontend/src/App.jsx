@@ -16,7 +16,7 @@ import EditLead from "./pages/EditLead";
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/crm">
         <Routes>
           <Route path="/login" element={<Login />} />
 

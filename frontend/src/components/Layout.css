@@ -2,7 +2,7 @@
 .app-layout {
   display: flex;
   min-height: 100vh;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 /* MAIN CONTENT */
@@ -10,42 +10,35 @@
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  height: 100vh;
+  /* height: 100vh; */
 }
 
 
-/* MOBILE HEADER FIX */
+/* MOBILE HEADER */
 .mobile-header {
   display: none;
 }
 
-/* MOBILE BEHAVIOR */
+/* MOBILE */
 @media (max-width: 768px) {
-  .layout {
-    position: relative;
-  }
-
-  .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    height: 100%;
-    transform: translateX(-100%);
-  }
-
-  .sidebar.open {
-    transform: translateX(0);
-  }
 
   .mobile-header {
     display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    align-items: center;
+    padding: 0 16px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 2000;
   }
 
   .main-content {
-    margin-left: 0;
+    margin-top: 60px;
+    padding: 16px;
   }
 
-  .layout.shift .main-content {
-    margin-left: 260px;
-  }
 }

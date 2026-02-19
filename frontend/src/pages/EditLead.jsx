@@ -14,7 +14,7 @@ export default function EditLead() {
   useEffect(() => {
     const fetchLead = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/leads/${id}`);
+        const res = await axios.get(`/api/leads/${id}`);
         setForm(res.data.lead);
       } catch (err) {
         console.error("Fetch lead error:", err);
@@ -35,8 +35,7 @@ export default function EditLead() {
 
   const handleMarkUnwanted = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/leads/${id}/request-junk`);
-
+      await axios.put(`/api/leads/${id}/request-junk`);
       alert("Lead sent to Admin for review");
       navigate("/leads");
     } catch (err) {
@@ -49,8 +48,7 @@ export default function EditLead() {
     e.preventDefault();
 
     try {
-      await axios.put(`http://localhost:5000/api/leads/${id}`, form);
-
+      await axios.put(`/api/leads/${id}`, form);
       alert("Lead updated successfully ✅");
       navigate(`/leads/${id}`);
     } catch (err) {
@@ -66,6 +64,7 @@ export default function EditLead() {
       <h2>Edit Lead</h2>
 
       <form onSubmit={handleSubmit} className="edit-form">
+
         {/* FIXED FIELDS */}
         <div className="form-group">
           <label>Name</label>
@@ -89,7 +88,11 @@ export default function EditLead() {
 
         <div className="form-group">
           <label>City</label>
-          <input name="city" value={form.city || ""} onChange={handleChange} />
+          <input
+            name="city"
+            value={form.city || ""}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="form-group">
@@ -112,7 +115,11 @@ export default function EditLead() {
 
         <div className="form-group">
           <label>Area</label>
-          <input name="area" value={form.area || ""} onChange={handleChange} />
+          <input
+            name="area"
+            value={form.area || ""}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="form-group">
@@ -167,7 +174,11 @@ export default function EditLead() {
 
         <div className="form-group">
           <label>Square Feet</label>
-          <input name="sqft" value={form.sqft || ""} onChange={handleChange} />
+          <input
+            name="sqft"
+            value={form.sqft || ""}
+            onChange={handleChange}
+          />
         </div>
 
         <div className="form-group">
@@ -177,6 +188,22 @@ export default function EditLead() {
             value={form.budget || ""}
             onChange={handleChange}
           />
+        </div>
+
+        {/* ✅ NEW FIELD ADDED HERE */}
+        <div className="form-group">
+          <label>Designs Sent</label>
+          <select
+            name="designs_sent"
+            value={form.designs_sent || 0}
+            onChange={handleChange}
+          >
+            {[...Array(11).keys()].map((num) => (
+              <option key={num} value={num}>
+                {num}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="form-group">

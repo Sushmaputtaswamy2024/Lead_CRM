@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/reports";
+const API = "api/reports";
 
 export const fetchTimePerLead = () =>
   axios.get(`${API}/time-per-lead`);

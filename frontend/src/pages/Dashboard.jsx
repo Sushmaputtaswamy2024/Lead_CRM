@@ -10,7 +10,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/leads/dashboard-summary")
+      .get("/api/leads/dashboard-summary")
       .then((res) => setSummary(res.data))
       .catch(console.error);
   }, []);
@@ -38,7 +38,7 @@ export default function Dashboard() {
 
     try {
       await axios.post(
-        "http://localhost:5000/api/leads/upload-justdial",
+        "/api/leads/upload-justdial",
         formData,
       );
 
@@ -46,7 +46,7 @@ export default function Dashboard() {
       window.location.href = "/leads";
 
       const res = await axios.get(
-        "http://localhost:5000/api/leads/dashboard-summary",
+        "/api/leads/dashboard-summary",
       );
       setSummary(res.data);
     } catch (err) {

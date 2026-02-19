@@ -13,13 +13,13 @@ export default function LeadTable({ leads }) {
 
   const handleReassign = async (leadId) => {
     const newAssignee = prompt(
-      "Enter email to reassign (vindiainfrasec@bda1 or vindiainfrasec@bda2):",
+      "Enter email to reassign (vindiainfrasec@bda1 or vindiainfrasec@bda2):"
     );
 
     if (!newAssignee) return;
 
     try {
-      await axios.put(`http://localhost:5000/api/leads/${leadId}/reassign`, {
+      await axios.put(`/api/leads/${leadId}/reassign`, {
         assigned_to: newAssignee,
       });
 
@@ -33,14 +33,14 @@ export default function LeadTable({ leads }) {
 
   const handlePermanentDelete = async (leadId) => {
     const confirmDelete = window.confirm(
-      "Are you sure you want to permanently delete this lead?",
+      "Are you sure you want to permanently delete this lead?"
     );
 
     if (!confirmDelete) return;
 
     try {
       await axios.put(
-        `http://localhost:5000/api/leads/${leadId}/permanent-delete`,
+        `/api/leads/${leadId}/permanent-delete`
       );
 
       alert("Lead permanently deleted 🗑");
@@ -61,6 +61,7 @@ export default function LeadTable({ leads }) {
             <th>Email</th>
             <th>Status</th>
             <th>Source</th>
+            <th>Designs Sent</th> {/* ✅ NEW COLUMN */}
             <th>Actions</th>
           </tr>
         </thead>
@@ -74,17 +75,23 @@ export default function LeadTable({ leads }) {
               >
                 {lead.name}
 
-                {user?.role !== "admin" && lead.assigned_to === user.email && (
-                  <span className="badge-assigned">Assigned to You</span>
-                )}
+                {user?.role !== "admin" &&
+                  lead.assigned_to === user.email && (
+                    <span className="badge-assigned">
+                      Assigned to You
+                    </span>
+                  )}
 
                 {user?.role !== "admin" && !lead.assigned_to && (
-                  <span className="badge-unassigned">Unassigned</span>
+                  <span className="badge-unassigned">
+                    Unassigned
+                  </span>
                 )}
               </td>
 
               <td>{lead.phone}</td>
               <td>{lead.email || "-"}</td>
+
               <td>
                 {lead.status === "JUNK_REQUESTED" ? (
                   <span style={{ color: "#ef4444", fontWeight: "600" }}>
@@ -97,9 +104,24 @@ export default function LeadTable({ leads }) {
 
               <td>
                 <span
-                  className={`source-badge ${lead.source?.toLowerCase() || ""}`}
+                  className={`source-badge ${
+                    lead.source?.toLowerCase() || ""
+                  }`}
                 >
                   {lead.source}
+                </span>
+              </td>
+
+              {/* ✅ DESIGNS SENT COLUMN */}
+              <td>
+                <span
+                  className={
+                    lead.designs_sent > 0
+                      ? "design-badge active"
+                      : "design-badge zero"
+                  }
+                >
+                  {lead.designs_sent ?? 0}
                 </span>
               </td>
 
@@ -146,7 +168,9 @@ export default function LeadTable({ leads }) {
                             border: "none",
                             cursor: "pointer",
                           }}
-                          onClick={() => handlePermanentDelete(lead.id)}
+                          onClick={() =>
+                            handlePermanentDelete(lead.id)
+                          }
                         >
                           Delete
                         </button>

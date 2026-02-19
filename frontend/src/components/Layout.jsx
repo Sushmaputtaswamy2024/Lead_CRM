@@ -8,6 +8,15 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
+
+      {/* ✅ MOBILE HEADER */}
+      <div className="mobile-header">
+        <button className="hamburger" onClick={() => setOpen(true)}>
+          ☰
+        </button>
+        <h3>Lead System</h3>
+      </div>
+
       <Sidebar open={open} setOpen={setOpen} />
 
       <main className="main-content">

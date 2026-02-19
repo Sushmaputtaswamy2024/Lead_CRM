@@ -8,14 +8,7 @@ export default function Sidebar({ open, setOpen }) {
 
   return (
     <>
-      {/* MOBILE HEADER */}
-      <div className="mobile-header">
-        <button className="hamburger" onClick={() => setOpen(true)}>
-          ☰
-        </button>
-        <h3>Lead System</h3>
-      </div>
-
+      
       {/* OVERLAY */}
       {open && <div className="overlay" onClick={() => setOpen(false)} />}
 
