@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/client";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./LeadDetails.css";
@@ -20,19 +20,19 @@ export default function LeadDetails() {
 
     const fetchDataAndStartSession = async () => {
       try {
-        const leadRes = await axios.get(
-          `/api/leads/${id}`
+        const leadRes = await api.get(
+          `/leads/${id}`
         );
         setLead(leadRes.data.lead);
 
-        const followRes = await axios.get(
-          `/api/leads/${id}/followups`
+        const followRes = await api.get(
+          `/leads/${id}/followups`
         );
         setFollowUps(followRes.data.followUps || []);
 
         if (user?.email) {
-          const sessionRes = await axios.post(
-            "/api/reports/start-session",
+          const sessionRes = await api.post(
+            "/reports/start-session",
             {
               lead_id: id,
               user_email: user.email,
@@ -51,7 +51,7 @@ export default function LeadDetails() {
 
     return () => {
       if (activeSessionId) {
-        axios.post("/api/reports/end-session", {
+        api.post("/reports/end-session", {
           session_id: activeSessionId,
         });
       }

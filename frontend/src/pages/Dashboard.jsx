@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/client";
 import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
 
@@ -9,8 +9,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get("/api/leads/dashboard-summary")
+    api
+      .get("/leads/dashboard-summary")
       .then((res) => setSummary(res.data))
       .catch(console.error);
   }, []);
@@ -37,16 +37,16 @@ export default function Dashboard() {
     formData.append("file", file);
 
     try {
-      await axios.post(
-        "/api/leads/upload-justdial",
+      await api.post(
+        "/leads/upload-justdial",
         formData,
       );
 
       alert("JustDial leads imported successfully 🚀");
       window.location.href = "/leads";
 
-      const res = await axios.get(
-        "/api/leads/dashboard-summary",
+      const res = await api.get(
+        "/leads/dashboard-summary",
       );
       setSummary(res.data);
     } catch (err) {

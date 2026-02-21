@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
+import api from "../api/client";
 import "./LeadTable.css";
 
 export default function LeadTable({ leads }) {
@@ -19,7 +19,7 @@ export default function LeadTable({ leads }) {
     if (!newAssignee) return;
 
     try {
-      await axios.put(`/api/leads/${leadId}/reassign`, {
+      await api.put(`/leads/${leadId}/reassign`, {
         assigned_to: newAssignee,
       });
 
@@ -39,8 +39,8 @@ export default function LeadTable({ leads }) {
     if (!confirmDelete) return;
 
     try {
-      await axios.put(
-        `/api/leads/${leadId}/permanent-delete`
+      await api.put(
+        `/leads/${leadId}/permanent-delete`
       );
 
       alert("Lead permanently deleted 🗑");

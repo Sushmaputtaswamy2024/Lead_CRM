@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/client";
 import "./Reports.css";
 import { fetchTimePerLead, fetchUserPerformance } from "../api/reports";
 
@@ -23,8 +23,8 @@ export default function Reports() {
   const [activityLogs, setActivityLogs] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("/api/reports/activity-logs")
+
+      api.get("/reports/activity-logs")
       .then(res => setActivityLogs(res.data.data || []))
       .catch(console.error);
 
@@ -56,7 +56,7 @@ export default function Reports() {
 
   const downloadFile = async (url, filename) => {
   try {
-    const response = await axios.get(url, {
+    const response = await api.get(url, {
       responseType: "blob"
     });
 

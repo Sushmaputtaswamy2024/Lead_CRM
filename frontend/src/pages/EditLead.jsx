@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../api/client";
 import { useParams, useNavigate } from "react-router-dom";
 import "./EditLead.css";
 import { useAuth } from "../context/AuthContext";
@@ -14,7 +14,7 @@ export default function EditLead() {
   useEffect(() => {
     const fetchLead = async () => {
       try {
-        const res = await axios.get(`/api/leads/${id}`);
+        const res = await api.get(`/leads/${id}`);
         setForm(res.data.lead);
       } catch (err) {
         console.error("Fetch lead error:", err);
@@ -35,7 +35,7 @@ export default function EditLead() {
 
   const handleMarkUnwanted = async () => {
     try {
-      await axios.put(`/api/leads/${id}/request-junk`);
+      await api.put(`/leads/${id}/request-junk`);
       alert("Lead sent to Admin for review");
       navigate("/leads");
     } catch (err) {
@@ -48,7 +48,7 @@ export default function EditLead() {
     e.preventDefault();
 
     try {
-      await axios.put(`/api/leads/${id}`, form);
+      await api.put(`/leads/${id}`, form);
       alert("Lead updated successfully ✅");
       navigate(`/leads/${id}`);
     } catch (err) {

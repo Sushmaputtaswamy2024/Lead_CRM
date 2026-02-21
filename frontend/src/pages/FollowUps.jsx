@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import axios from "axios";
+import api from "../api/client";
 import { useLocation } from "react-router-dom";
 import "./FollowUps.css";
 
@@ -16,12 +16,12 @@ export default function FollowUps() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const todayRes = await axios.get(
-          "/api/leads/followups/today"
+        const todayRes = await api.get(
+          "/leads/followups/today"
         );
 
-        const pendingRes = await axios.get(
-          "/api/leads/followups/pending"
+        const pendingRes = await api.get(
+          "/leads/followups/pending"
         );
 
         setToday(todayRes.data.todayFollowUps || []);
