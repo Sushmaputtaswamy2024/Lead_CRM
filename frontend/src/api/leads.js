@@ -5,7 +5,7 @@ import api from "./client";
 ======================= */
 
 export const fetchLeads = (user, showJunk = false) =>
-  api.get("/api/leads", {
+  api.get("/leads", {
     params: {
       role: user?.role,
       email: user?.email,
@@ -14,16 +14,16 @@ export const fetchLeads = (user, showJunk = false) =>
   });
 
 export const fetchLeadById = (id) =>
-  api.get(`/api/leads/${id}`);
+  api.get(`/leads/${id}`);
 
 export const addLead = (data) =>
-  api.post("/api/leads", data);
+  api.post("/leads", data);
 
 export const updateLead = (id, data) =>
-  api.put(`/api/leads/${id}`, data);
+  api.put(`/leads/${id}`, data);
 
 export const deleteLead = (id) =>
-  api.delete(`/api/leads/${id}`);
+  api.delete(`/leads/${id}`);
 
 
 /* =======================
@@ -31,10 +31,10 @@ export const deleteLead = (id) =>
 ======================= */
 
 export const fetchTodayFollowUps = () =>
-  api.get("/api/leads/followups/today");
+  api.get("/leads/followups/today");
 
 export const fetchPendingFollowUps = () =>
-  api.get("/api/leads/followups/pending");
+  api.get("/leads/followups/pending");
 
 
 /* =======================
@@ -42,10 +42,10 @@ export const fetchPendingFollowUps = () =>
 ======================= */
 
 export const fetchFollowUpsByLead = (leadId) =>
-  api.get(`/api/leads/${leadId}/followups`);
+  api.get(`/leads/${leadId}/followups`);
 
 export const addFollowUp = (leadId, data) =>
-  api.post(`/api/leads/${leadId}/followups`, data);
+  api.post(`/leads/${leadId}/followups`, data);
 
 
 /* =======================
@@ -53,7 +53,7 @@ export const addFollowUp = (leadId, data) =>
 ======================= */
 
 export const fetchLeadTimeline = (leadId) =>
-  api.get(`/api/leads/${leadId}/timeline`);
+  api.get(`/leads/${leadId}/timeline`);
 
 
 /* =======================
@@ -61,4 +61,4 @@ export const fetchLeadTimeline = (leadId) =>
 ======================= */
 
 export const fetchDashboardSummary = () =>
-  api.get("/api/leads/dashboard-summary");
+  api.get("/leads/dashboard-summary");
