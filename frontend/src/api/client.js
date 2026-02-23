@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
-  withCredentials: true,
+  baseURL: "https://crm.vindiainfrasec.com",
+
+  
 });
 
 export default api;
