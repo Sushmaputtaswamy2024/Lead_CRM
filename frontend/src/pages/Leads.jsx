@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { fetchLeads } from "../api/leads";
 import LeadTable from "../components/LeadTable";
 import { useLocation } from "react-router-dom";
@@ -7,9 +7,9 @@ import "./Leads.css";
 
 export default function Leads() {
   const { user } = useAuth();
+  const location = useLocation();
 
   const [leads, setLeads] = useState([]);
-  const [filteredLeads, setFilteredLeads] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
@@ -18,66 +18,67 @@ export default function Leads() {
   const [sortOrder, setSortOrder] = useState("newest");
   const [showJunk, setShowJunk] = useState(false);
 
-  const location = useLocation();
-
-  // ================= LOAD LEADS =================
-  const loadLeads = async () => {
-  if (!user) return;
-
-  try {
-    const res = await fetchLeads(user, showJunk);
-    const data = res.data.leads || [];
-
-    setLeads(data);
-    setFilteredLeads(data);
-
-    // 👇 ADD THIS LINE HERE
-    window.scrollTo({ top: 0, behavior: "smooth" });
-
-  } catch (err) {
-    console.error("Fetch leads error:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
+  /* ================= LOAD LEADS ================= */
   useEffect(() => {
+    let isMounted = true;
+
+    const loadLeads = async () => {
+      if (!user) return;
+
+      try {
+        const res = await fetchLeads(user, showJunk);
+        const data = res.data.leads || [];
+
+        if (isMounted) {
+          setLeads(data);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      } catch (err) {
+        console.error("Fetch leads error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
     loadLeads();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, showJunk]);
 
-  // ================= READ DASHBOARD QUERY =================
+  /* ================= READ DASHBOARD QUERY ================= */
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-
     const status = params.get("status");
-    const today = params.get("today");
 
     if (status) {
       setStatusFilter(status);
     }
+  }, [location.search]);
+
+  /* ================= DERIVED FILTERED DATA ================= */
+  const filteredLeads = useMemo(() => {
+    let data = [...leads];
+
+    const params = new URLSearchParams(location.search);
+    const today = params.get("today");
 
     if (today === "true") {
       const todayDate = new Date().toISOString().slice(0, 10);
-
-      const todayLeads = leads.filter(
-        (lead) => lead.created_at && lead.created_at.slice(0, 10) === todayDate,
+      data = data.filter(
+        (lead) =>
+          lead.created_at &&
+          lead.created_at.slice(0, 10) === todayDate
       );
-
-      setFilteredLeads(todayLeads);
     }
-  }, [location.search, leads]);
-
-  // ================= FILTER + SORT =================
-  useEffect(() => {
-    let data = [...leads];
 
     if (search) {
       data = data.filter(
         (lead) =>
           lead.name?.toLowerCase().includes(search.toLowerCase()) ||
           lead.phone?.includes(search) ||
-          lead.email?.toLowerCase().includes(search.toLowerCase()),
+          lead.email?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -89,7 +90,7 @@ export default function Leads() {
       data = data.filter(
         (lead) =>
           lead.source &&
-          lead.source.toLowerCase() === sourceFilter.toLowerCase(),
+          lead.source.toLowerCase() === sourceFilter.toLowerCase()
       );
     }
 
@@ -101,8 +102,8 @@ export default function Leads() {
         : new Date(a.created_at) - new Date(b.created_at);
     });
 
-    setFilteredLeads(data);
-  }, [search, statusFilter, sourceFilter, sortOrder, leads]);
+    return data;
+  }, [leads, search, statusFilter, sourceFilter, sortOrder, location.search]);
 
   const resetFilters = () => {
     setSearch("");

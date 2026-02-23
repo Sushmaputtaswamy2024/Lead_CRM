@@ -1,9 +1,9 @@
-import axios from "axios";
+import api from "./client";
 
-const API = "api/reports";
+const API = "/api/reports";
 
 export const fetchTimePerLead = () =>
-  axios.get(`${API}/time-per-lead`);
+  api.get(`${API}/time-per-lead`);
 
 export const fetchUserPerformance = () =>
-  axios.get(`${API}/user-performance`);
+  api.get(`${API}/user-performance`);

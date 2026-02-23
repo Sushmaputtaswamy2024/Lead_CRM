@@ -11,34 +11,32 @@ export default function LeadDetails() {
 
   const [lead, setLead] = useState(null);
   const [followUps, setFollowUps] = useState([]);
-
   const [currentPage, setCurrentPage] = useState(1);
+
   const followupsPerPage = 5;
 
   useEffect(() => {
+    let isMounted = true;
     let activeSessionId = null;
 
     const fetchDataAndStartSession = async () => {
       try {
-        const leadRes = await api.get(
-          `/leads/${id}`
-        );
-        setLead(leadRes.data.lead);
+        // ✅ FIXED API PATHS
+        const leadRes = await api.get(`/api/leads/${id}`);
+        const followRes = await api.get(`/api/leads/${id}/followups`);
 
-        const followRes = await api.get(
-          `/leads/${id}/followups`
-        );
-        setFollowUps(followRes.data.followUps || []);
+        if (isMounted) {
+          setLead(leadRes.data.lead);
+          setFollowUps(followRes.data.followUps || []);
+        }
 
+        // Start session tracking
         if (user?.email) {
-          const sessionRes = await api.post(
-            "/reports/start-session",
-            {
-              lead_id: id,
-              user_email: user.email,
-              user_role: user.role,
-            }
-          );
+          const sessionRes = await api.post("/api/reports/start-session", {
+            lead_id: id,
+            user_email: user.email,
+            user_role: user.role,
+          });
 
           activeSessionId = sessionRes.data.sessionId;
         }
@@ -51,10 +49,11 @@ export default function LeadDetails() {
 
     return () => {
       if (activeSessionId) {
-        api.post("/reports/end-session", {
+        api.post("/api/reports/end-session", {
           session_id: activeSessionId,
         });
       }
+      isMounted = false;
     };
   }, [id, user]);
 
@@ -75,7 +74,7 @@ export default function LeadDetails() {
   const indexOfLast = currentPage * followupsPerPage;
   const indexOfFirst = indexOfLast - followupsPerPage;
   const currentFollowUps = followUps.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(followUps.length / followupsPerPage);
+  const totalPages = Math.ceil(totalCount / followupsPerPage);
 
   const formatDate = (date) => {
     if (!date) return "-";
@@ -86,7 +85,6 @@ export default function LeadDetails() {
 
   return (
     <div className="lead-details-page">
-
       <div className="details-header">
         <h2>Lead Details</h2>
 
@@ -99,7 +97,6 @@ export default function LeadDetails() {
       </div>
 
       <div className="lead-info">
-
         <p><b>Name:</b> {lead.name}</p>
         <p><b>Phone:</b> {lead.phone}</p>
         <p><b>WhatsApp:</b> {lead.whatsapp}</p>
@@ -115,7 +112,6 @@ export default function LeadDetails() {
         <p><b>Assigned To:</b> {lead.assigned_to || "-"}</p>
         <p><b>Quotation Sent:</b> {lead.quotation_sent || "-"}</p>
 
-        {/* ⭐ DESIGNS SENT VISUAL BADGE */}
         <p>
           <b>Designs Sent:</b>{" "}
           <span

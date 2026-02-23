@@ -488,63 +488,45 @@ const logLeadActivity = (db, { leadId, user, action, startTime, endTime }) => {
   );
 };
 
-const getDashboardSummary = (req, res) => {
-  const summary = {};
-
-  // Total leads
-  db.query("SELECT COUNT(*) AS total FROM leads", (err, totalResult) => {
-    if (err) return res.status(500).json({ error: "DB error" });
-    summary.totalLeads = totalResult[0].total;
-
-    // Today leads
-    db.query(
-      "SELECT COUNT(*) AS today FROM leads WHERE DATE(created_at) = CURDATE()",
-      (err, todayResult) => {
-        if (err) return res.status(500).json({ error: "DB error" });
-        summary.todayLeads = todayResult[0].today;
-
-        // Interested
-        db.query(
-          "SELECT COUNT(*) AS interested FROM leads WHERE LOWER(status) = 'interested'",
-          (err, interestedResult) => {
-            if (err) return res.status(500).json({ error: "DB error" });
-            summary.interested = interestedResult[0].interested;
-
-            // Converted
-            db.query(
-              "SELECT COUNT(*) AS converted FROM leads WHERE LOWER(status) = 'converted'",
-              (err, convertedResult) => {
-                if (err) return res.status(500).json({ error: "DB error" });
-                summary.converted = convertedResult[0].converted;
-
-                // Today Followups
-                db.query(
-                  "SELECT COUNT(*) AS todayFollowUps FROM followups WHERE DATE(next_followup) = CURDATE()",
-                  (err, todayFU) => {
-                    if (err) return res.status(500).json({ error: "DB error" });
-                    summary.todayFollowUps = todayFU[0].todayFollowUps;
-
-                    // Pending Followups
-                    db.query(
-                      "SELECT COUNT(*) AS pendingFollowUps FROM followups WHERE DATE(next_followup) < CURDATE()",
-                      (err, pendingFU) => {
-                        if (err)
-                          return res.status(500).json({ error: "DB error" });
-                        summary.pendingFollowUps =
-                          pendingFU[0].pendingFollowUps;
-
-                        res.json(summary);
-                      },
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
+const getDashboardSummary = async (req, res) => {
+  try {
+    const [total] = await db.promise().query(
+      "SELECT COUNT(*) AS total FROM leads WHERE deleted_by_admin = 0"
     );
-  });
+
+    const [today] = await db.promise().query(
+      "SELECT COUNT(*) AS today FROM leads WHERE DATE(created_at) = CURDATE() AND deleted_by_admin = 0"
+    );
+
+    const [interested] = await db.promise().query(
+      "SELECT COUNT(*) AS interested FROM leads WHERE LOWER(status) = 'interested' AND deleted_by_admin = 0"
+    );
+
+    const [converted] = await db.promise().query(
+      "SELECT COUNT(*) AS converted FROM leads WHERE LOWER(status) = 'converted' AND deleted_by_admin = 0"
+    );
+
+    const [todayFU] = await db.promise().query(
+      "SELECT COUNT(*) AS todayFollowUps FROM followups WHERE DATE(next_followup) = CURDATE()"
+    );
+
+    const [pendingFU] = await db.promise().query(
+      "SELECT COUNT(*) AS pendingFollowUps FROM followups WHERE DATE(next_followup) < CURDATE()"
+    );
+
+    res.json({
+      totalLeads: total[0].total,
+      todayLeads: today[0].today,
+      interested: interested[0].interested,
+      converted: converted[0].converted,
+      todayFollowUps: todayFU[0].todayFollowUps,
+      pendingFollowUps: pendingFU[0].pendingFollowUps,
+    });
+
+  } catch (err) {
+    console.error("Dashboard summary error:", err);
+    res.status(500).json({ error: "Dashboard error" });
+  }
 };
 
 const importJustDialPDF = (req, res) => {

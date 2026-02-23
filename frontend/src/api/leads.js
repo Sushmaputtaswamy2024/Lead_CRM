@@ -1,45 +1,64 @@
-import axios from "axios";
-
+import api from "./client";
 
 /* =======================
    LEADS
 ======================= */
 
 export const fetchLeads = (user, showJunk = false) =>
-  axios.get(`/leads`, {
+  api.get("/api/leads", {
     params: {
       role: user?.role,
       email: user?.email,
-      junk: showJunk ? "true" : undefined
-    }
+      junk: showJunk ? "true" : undefined,
+    },
   });
 
+export const fetchLeadById = (id) =>
+  api.get(`/api/leads/${id}`);
 
-export const fetchLeadById = (id) => axios.get(`/leads/${id}`);
+export const addLead = (data) =>
+  api.post("/api/leads", data);
 
-export const addLead = (data) => axios.post(`/leads`, data);
+export const updateLead = (id, data) =>
+  api.put(`/api/leads/${id}`, data);
 
-export const updateLead = (id, data) => axios.put(`/leads/${id}`, data);
+export const deleteLead = (id) =>
+  api.delete(`/api/leads/${id}`);
+
 
 /* =======================
    FOLLOW UPS (GLOBAL)
 ======================= */
 
-export const fetchTodayFollowUps = () => axios.get(`/followups/today`);
+export const fetchTodayFollowUps = () =>
+  api.get("/api/leads/followups/today");
 
 export const fetchPendingFollowUps = () =>
-  axios.get(`/followups/pending`);
+  api.get("/api/leads/followups/pending");
+
 
 /* =======================
    FOLLOW UPS (BY LEAD)
 ======================= */
 
 export const fetchFollowUpsByLead = (leadId) =>
-  axios.get(`/leads/${leadId}/followups`);
+  api.get(`/api/leads/${leadId}/followups`);
+
+export const addFollowUp = (leadId, data) =>
+  api.post(`/api/leads/${leadId}/followups`, data);
+
 
 /* =======================
    TIMELINE
 ======================= */
 
 export const fetchLeadTimeline = (leadId) =>
-  axios.get(`/leads/${leadId}/timeline`);
+  api.get(`/api/leads/${leadId}/timeline`);
+
+
+/* =======================
+   DASHBOARD
+======================= */
+
+export const fetchDashboardSummary = () =>
+  api.get("/api/leads/dashboard-summary");

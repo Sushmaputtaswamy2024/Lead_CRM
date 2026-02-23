@@ -1,20 +1,52 @@
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import api from "../api/client";
 import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
-  const [summary, setSummary] = useState({});
+  const [summary, setSummary] = useState({
+    totalLeads: 0,
+    interested: 0,
+    converted: 0,
+    todayLeads: 0,
+    todayFollowUps: 0,
+    pendingFollowUps: 0,
+  });
+
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
+  /* ================= LOAD DASHBOARD SUMMARY ================= */
   useEffect(() => {
-    api
-      .get("/leads/dashboard-summary")
-      .then((res) => setSummary(res.data))
-      .catch(console.error);
+    let isMounted = true;
+
+    const loadSummary = async () => {
+      try {
+        const res = await api.get("/api/leads/dashboard-summary");
+
+        if (isMounted && res.data) {
+          setSummary({
+            totalLeads: res.data.totalLeads || 0,
+            interested: res.data.interested || 0,
+            converted: res.data.converted || 0,
+            todayLeads: res.data.todayLeads || 0,
+            todayFollowUps: res.data.todayFollowUps || 0,
+            pendingFollowUps: res.data.pendingFollowUps || 0,
+          });
+        }
+      } catch (err) {
+        console.error("Dashboard summary error:", err);
+      }
+    };
+
+    loadSummary();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
+  /* ================= CALCULATIONS ================= */
   const conversionRate =
     summary.totalLeads > 0
       ? Math.round((summary.converted / summary.totalLeads) * 100)
@@ -25,6 +57,7 @@ export default function Dashboard() {
       ? Math.round((summary.interested / summary.totalLeads) * 100)
       : 0;
 
+  /* ================= FILE IMPORT ================= */
   const handleImportClick = () => {
     fileInputRef.current.click();
   };
@@ -37,20 +70,17 @@ export default function Dashboard() {
     formData.append("file", file);
 
     try {
-      await api.post(
-        "/leads/upload-justdial",
-        formData,
-      );
+      await api.post("/api/leads/upload-justdial", formData);
 
       alert("JustDial leads imported successfully 🚀");
-      window.location.href = "/leads";
 
-      const res = await api.get(
-        "/leads/dashboard-summary",
-      );
+      // Reload summary after upload
+      const res = await api.get("/api/leads/dashboard-summary");
       setSummary(res.data);
+
+      navigate("/leads");
     } catch (err) {
-      console.error(err);
+      console.error("Upload failed:", err);
       alert("Upload failed ❌");
     }
   };
@@ -81,7 +111,7 @@ export default function Dashboard() {
           onClick={() => navigate("/leads")}
         >
           <p>Total Leads</p>
-          <h1>{summary.totalLeads || 0}</h1>
+          <h1>{summary.totalLeads}</h1>
         </div>
 
         <div
@@ -89,7 +119,7 @@ export default function Dashboard() {
           onClick={() => navigate("/leads?status=Interested")}
         >
           <p>Interested</p>
-          <h1>{summary.interested || 0}</h1>
+          <h1>{summary.interested}</h1>
         </div>
 
         <div
@@ -97,7 +127,7 @@ export default function Dashboard() {
           onClick={() => navigate("/leads?status=Converted")}
         >
           <p>Converted</p>
-          <h1>{summary.converted || 0}</h1>
+          <h1>{summary.converted}</h1>
         </div>
 
         <div
@@ -105,23 +135,23 @@ export default function Dashboard() {
           onClick={() => navigate("/leads?today=true")}
         >
           <p>Today Leads</p>
-          <h1>{summary.todayLeads || 0}</h1>
+          <h1>{summary.todayLeads}</h1>
         </div>
 
         <div
-          className="dash-card teal clickable"
+          className="dash-card teal clickable-card"
           onClick={() => navigate("/follow-ups?filter=today")}
         >
           <p>Today Follow-Ups</p>
-          <h1>{summary.todayFollowUps || 0}</h1>
+          <h1>{summary.todayFollowUps}</h1>
         </div>
 
         <div
-          className="dash-card red clickable"
+          className="dash-card red clickable-card"
           onClick={() => navigate("/follow-ups?filter=pending")}
         >
           <p>Pending Follow-Ups</p>
-          <h1>{summary.pendingFollowUps || 0}</h1>
+          <h1>{summary.pendingFollowUps}</h1>
         </div>
       </div>
 
@@ -141,7 +171,7 @@ export default function Dashboard() {
             <li>
               <span>Pending Leads</span>
               <strong>
-                {(summary.totalLeads || 0) - (summary.converted || 0)}
+                {summary.totalLeads - summary.converted}
               </strong>
             </li>
           </ul>
@@ -151,11 +181,13 @@ export default function Dashboard() {
           <h3>Follow-Up Health</h3>
           <div className="health-item">
             <span>Today Follow-Ups</span>
-            <strong>{summary.todayFollowUps || 0}</strong>
+            <strong>{summary.todayFollowUps}</strong>
           </div>
           <div className="health-item">
             <span>Pending Follow-Ups</span>
-            <strong className="danger">{summary.pendingFollowUps || 0}</strong>
+            <strong className="danger">
+              {summary.pendingFollowUps}
+            </strong>
           </div>
         </div>
 
@@ -163,14 +195,16 @@ export default function Dashboard() {
           <h3>System Snapshot</h3>
           <div className="snapshot">
             <p>
-              Total Active Leads: <strong>{summary.totalLeads || 0}</strong>
+              Total Active Leads: <strong>{summary.totalLeads}</strong>
             </p>
             <p>
-              Converted Leads: <strong>{summary.converted || 0}</strong>
+              Converted Leads: <strong>{summary.converted}</strong>
             </p>
             <p>
               Engagement Level:{" "}
-              <strong>{conversionRate > 30 ? "Strong" : "Moderate"}</strong>
+              <strong>
+                {conversionRate > 30 ? "Strong" : "Moderate"}
+              </strong>
             </p>
           </div>
         </div>

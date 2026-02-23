@@ -6,32 +6,37 @@ import "./FollowUps.css";
 export default function FollowUps() {
   const [today, setToday] = useState([]);
   const [pending, setPending] = useState([]);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
-  // Refs for smooth scrolling
   const todayRef = useRef(null);
   const pendingRef = useRef(null);
 
   /* ================= FETCH DATA ================= */
   useEffect(() => {
-    async function fetchData() {
+    let isMounted = true;
+
+    const fetchData = async () => {
       try {
-        const todayRes = await api.get(
-          "/leads/followups/today"
-        );
+        const todayRes = await api.get("/api/leads/followups/today");
+        const pendingRes = await api.get("/api/leads/followups/pending");
 
-        const pendingRes = await api.get(
-          "/leads/followups/pending"
-        );
-
-        setToday(todayRes.data.todayFollowUps || []);
-        setPending(pendingRes.data.pendingFollowUps || []);
+        if (isMounted) {
+          setToday(todayRes.data.todayFollowUps || []);
+          setPending(pendingRes.data.pendingFollowUps || []);
+        }
       } catch (err) {
         console.error("Followups fetch error:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    }
+    };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   /* ================= HANDLE DASHBOARD FILTER ================= */
@@ -50,11 +55,13 @@ export default function FollowUps() {
 
   const total = today.length + pending.length;
 
+  if (loading) return <p className="loading">Loading follow-ups...</p>;
+
   return (
     <div className="followups-page">
       <h2 className="page-title">Follow Ups</h2>
 
-      {/* ================= SUMMARY CARDS ================= */}
+      {/* SUMMARY CARDS */}
       <div className="followup-summary">
         <div className="summary-card today">
           <p>Today</p>
@@ -72,10 +79,9 @@ export default function FollowUps() {
         </div>
       </div>
 
-      {/* ================= FOLLOWUP GRID ================= */}
+      {/* GRID */}
       <div className="followup-grid">
-        
-        {/* TODAY COLUMN */}
+        {/* TODAY */}
         <div className="followup-column" ref={todayRef}>
           <h3>Today Follow Ups</h3>
 
@@ -94,7 +100,7 @@ export default function FollowUps() {
           )}
         </div>
 
-        {/* PENDING COLUMN */}
+        {/* PENDING */}
         <div className="followup-column" ref={pendingRef}>
           <h3>Pending Follow Ups</h3>
 
@@ -112,7 +118,6 @@ export default function FollowUps() {
             ))
           )}
         </div>
-
       </div>
     </div>
   );

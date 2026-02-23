@@ -19,7 +19,7 @@ export default function AddLead() {
     whatsapp: "",
     email: "",
     city: "",
-    source: "manual",
+    source: "Manual",
     status: "New",
 
     call_status: "",
@@ -32,7 +32,7 @@ export default function AddLead() {
 
     assigned_to: "",
     quotation_sent: "No",
-    designs_sent: "0", // ✅ NEW FIELD
+    designs_sent: 0,
 
     project_start: "",
     snooze_until: "",
@@ -44,7 +44,7 @@ export default function AddLead() {
     setForm((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "phone" && sameWhatsapp && { whatsapp: value }),
+      ...(name === "phone" && sameWhatsapp ? { whatsapp: value } : {}),
     }));
   };
 
@@ -52,7 +52,9 @@ export default function AddLead() {
     if (!reminder.value) return "";
 
     const now = new Date();
-    const val = parseInt(reminder.value);
+    const val = parseInt(reminder.value, 10);
+
+    if (isNaN(val)) return "";
 
     if (reminder.unit === "hours") now.setHours(now.getHours() + val);
     if (reminder.unit === "days") now.setDate(now.getDate() + val);
@@ -64,20 +66,20 @@ export default function AddLead() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const snoozeDate = calculateSnooze();
-
     try {
+      const snoozeDate = calculateSnooze();
+
       await addLead({
         ...form,
-        designs_sent: Number(form.designs_sent), // ensure number
+        designs_sent: Number(form.designs_sent),
         snooze_until: snoozeDate,
       });
 
-      alert("Lead added successfully");
+      alert("Lead added successfully 🚀");
       navigate("/leads");
     } catch (err) {
-      console.error(err);
-      alert("Failed to add lead");
+      console.error("Add lead error:", err);
+      alert("Failed to add lead ❌");
     }
   };
 
@@ -87,7 +89,7 @@ export default function AddLead() {
 
       <form className="add-lead-grid" onSubmit={handleSubmit}>
         {/* LEFT SECTION */}
-        <div className="card animate">
+        <div className="card">
           <h3>Lead Details</h3>
 
           <input name="name" placeholder="Name" onChange={handleChange} required />
@@ -151,7 +153,7 @@ export default function AddLead() {
             onChange={handleChange}
           />
 
-          {/* 🔔 Snoozer */}
+          {/* Reminder Section */}
           <h4>Reminder / Snooze</h4>
           <div className="reminder-row">
             <input
@@ -177,7 +179,7 @@ export default function AddLead() {
         </div>
 
         {/* RIGHT SECTION */}
-        <div className="card assignment-card animate">
+        <div className="card assignment-card">
           <h3>Assignment</h3>
 
           <select name="assigned_to" onChange={handleChange}>
@@ -203,21 +205,25 @@ export default function AddLead() {
                 name="quotation_sent"
                 value="No"
                 defaultChecked
+                onChange={handleChange}
               />
               No
             </label>
           </div>
 
-          {/* ✅ NEW DESIGNS SENT DROPDOWN */}
           <div className="designs-section">
             <p>Designs Sent</p>
-            <select name="designs_sent" value={form.designs_sent} onChange={handleChange}>
-              <option value="0">0</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5+</option>
+            <select
+              name="designs_sent"
+              value={form.designs_sent}
+              onChange={handleChange}
+            >
+              <option value={0}>0</option>
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+              <option value={3}>3</option>
+              <option value={4}>4</option>
+              <option value={5}>5+</option>
             </select>
           </div>
 
